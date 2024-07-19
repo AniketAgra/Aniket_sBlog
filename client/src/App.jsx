@@ -7,11 +7,12 @@ import Signup from "../pages/signup";
 import Dashboard from "../pages/dashboard";
 import Signin from "../pages/signin";
 import Projects from "../pages/projects";
-
+import Header from "../src/components/header"
 
 const app = () => {
   return(
     <BrowserRouter>
+        <Header/>
         <Routes>
             <Route path="/" element={<Home/>} ></Route>
             <Route path="/about" element={<About/>} ></Route>
