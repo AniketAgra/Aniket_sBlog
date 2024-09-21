@@ -1,3 +1,5 @@
+import flowbitePlugin from 'flowbite/plugin';
+
 export default {
   content: [
     './index.html',
@@ -8,6 +10,6 @@ export default {
     extend: {},
   },
   plugins: [
-    import('flowbite/plugin'),
+    flowbitePlugin,
   ],
 };
