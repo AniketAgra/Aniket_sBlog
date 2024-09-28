@@ -78,19 +78,19 @@ export default function Header() {
             <div className='hidden lg:flex gap-4'>
                 <Link 
                     to='/' 
-                    className={`text-gray-900 ${path === '/' ? 'text-blue-700 font-semibold' : 'hover:text-blue-500'}`}
+                    className={`text-gray-900 ${path === '/' ? 'text-blue-500 font-semibold' : 'hover:text-blue-500'}`}
                 >
                     Home
                 </Link>
                 <Link 
                     to='/about' 
-                    className={`text-gray-900 ${path === '/about' ? 'text-blue-700 font-semibold' : 'hover:text-blue-500'}`}
+                    className={`text-gray-900 ${path === '/about' ? 'text-blue-500 font-semibold' : 'hover:text-blue-500'}`}
                 >
                     About
                 </Link>
                 <Link 
                     to='/projects' 
-                    className={`text-gray-900 ${path === '/projects' ? 'text-blue-700 font-semibold' : 'hover:text-blue-500'}`}
+                    className={`text-gray-900 ${path === '/projects' ? 'text-blue-500 font-semibold' : 'hover:text-blue-500'}`}
                 >
                     Projects
                 </Link>
