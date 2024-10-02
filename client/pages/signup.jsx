@@ -36,7 +36,7 @@ const Signup = () => {
         }
     }
     return (
-        <div className="min-h-screen mt-10 md:mt-20 flex items-center justify-center ">
+        <div className="min-h-screen mt-10 md:mt-20 flex items-center justify-center " style={{ width: '100vw', height: '80vh' }}>
             <div className="flex flex-col md:flex-row max-w-4xl w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-5 gap-5 items-center justify-center">
                 {/* Left */}
                 <div className="flex-1 flex flex-col items-start md:items-start">
