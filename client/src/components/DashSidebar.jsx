@@ -19,7 +19,7 @@ export default function DashSidebar() {
         <Sidebar.Items>
             <Sidebar.ItemGroup>
                 <Link to='/dashboard?tab=profile'>  {/*here we are using the Link component from react-router-dom to navigate to the dashboard page with the tab query parameter set to profile */}
-                    <Sidebar.Item active={tab==='profile'} icon={HiUser} label={"User"} labelColor='dark'>Profile</Sidebar.Item>
+                    <Sidebar.Item active={tab==='profile'} icon={HiUser} label={"User"} labelColor='dark' as='div'>Profile</Sidebar.Item>
                 </Link>
                 <Sidebar.Item icon={HiArrowSmRight} className='cursor-pointer'>Sign Out</Sidebar.Item>
             </Sidebar.ItemGroup>
