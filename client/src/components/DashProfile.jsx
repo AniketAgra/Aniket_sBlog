@@ -3,6 +3,9 @@ import { useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { updateStart,updateSuccess,updateFail } from "../redux/user/userSlice.js";
+import { useDispatch } from "react-redux";
+import { set } from "mongoose";
 
 
 export default function DashProfile() {
@@ -12,7 +15,12 @@ export default function DashProfile() {
     const filePickerRef = useRef(); // Reference to the file input element
     const placeholderImage = "https://via.placeholder.com/150"; // Placeholder image
     const [imageFileUploadError, setImageFileUploadError] = useState(null);
+    const [imageFileUploading, setImageFileUploading] = useState(false);
     const [imageFileUploadProgress, setImageFileUploadProgress] = useState(null);
+    const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+    const [updateUserError, setUpdateUserError] = useState(null);
+    const [formData,setFormdata] = useState({});
+    const dispatch = useDispatch();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -33,6 +41,7 @@ export default function DashProfile() {
     }, [imageFile]);
 
     const uploadImage = async () => {
+        setImageFileUploading(true); // Set uploading status to true
         setImageFileUploadError(null);
         setImageFileUploadProgress(null); // Reset progress
     
@@ -61,6 +70,8 @@ export default function DashProfile() {
                         const imgData = JSON.parse(xhr.responseText);
                         setImageFileURL(imgData.secure_url || imgData.url); // Use the uploaded image URL
                         setImageFileUploadProgress(100); // Ensure progress shows 100%
+                        setFormdata({...formData,profilePicture:imgData.secure_url || imgData.url})
+                        setImageFileUploading(false); // Set uploading status to false
                     } else {
                         throw new Error("Failed to upload image");
                     }
@@ -72,6 +83,7 @@ export default function DashProfile() {
                     setImageFileUploadProgress(null);
                     setImageFile(null);
                     setImageFileURL(null);
+                    setImageFileUploading(false);
                 };
     
                 xhr.send(formData); // Send the form data
@@ -81,15 +93,49 @@ export default function DashProfile() {
             setImageFileUploadProgress(null);
             setImageFile(null);
             setImageFileURL(null);
+            setImageFileUploading(false);
         }
     };
     
 
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async(e) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log("Form submitted with updated data");
+        setUpdateUserError(null);
+        setUpdateUserSuccess(null);
+        if(Object.keys(formData).length === 0){    //Object.keys() - returns an array of a given object's own enumerable property names
+            setUpdateUserError("Please update at least one field.");
+            return;
+        }
+        if(imageFileUploading){
+            return;
+        }
+        try{
+            dispatch(updateStart());
+            const res = await fetch(`/api/user/update/${currentUser._id}`,{
+                method:"PUT",
+                headers:{
+                    "Content-Type":"application/json",
+                },
+                body:JSON.stringify(formData)
+            })
+            const data = await res.json();
+            if(!res.ok){
+                dispatch(updateFail(data.message))
+                setUpdateUserError(data.message);
+            }else{
+                dispatch(updateSuccess(data));
+                setUpdateUserSuccess("User profile updated successfully.");
+            }
+        }catch(error){
+            dispatch(updateFail(error.message));
+        }
     };
+
+    const handleChange = (e) => {
+        setFormdata({...formData,[e.target.id]:e.target.value})
+    }
+
+    console.log(formData)
 
     return (
         <div className="max-w-lg mx-auto p-3 w-full">
@@ -128,15 +174,15 @@ export default function DashProfile() {
                     type="text"
                     id="username"
                     placeholder="Username"
-                    defaultValue={currentUser?.username}
+                    defaultValue={currentUser?.username}onChange = {handleChange}
                 />
                 <TextInput
                     type="email"
                     id="email"
                     placeholder="Email"
-                    defaultValue={currentUser?.email}
+                    defaultValue={currentUser?.email}onChange = {handleChange}
                 />
-                <TextInput type="password" id="password" placeholder="Password" />
+                <TextInput type="password" id="password" placeholder="Password" onChange = {handleChange}/>
                 <Button
                     type="submit"
                     className="border-2 bg-none text-blue-500 border-x-purple-500 border-y-blue-500 hover:text-white hover:border-transparent hover:bg-gradient-to-br hover:from-purple-500 hover:to-blue-500 rounded-md"
@@ -149,6 +195,8 @@ export default function DashProfile() {
                 <span className="cursor-pointer">Delete Account</span>
                 <span className="cursor-pointer">Sign Out</span>
             </div>
+            {updateUserSuccess && <Alert color='success'>{updateUserSuccess}</Alert>}
+            {updateUserError && <Alert color='failure'>{updateUserError}</Alert>}
         </div>
     );
 }

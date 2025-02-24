@@ -1,11 +1,11 @@
-import { errorHandler } from "../utils/error"
+import { errorHandler } from "../utils/error.js"
 import bcryptjs from "bcryptjs";
 
 export const test = (req,res) => {
     res.json({message : 'API is working!'})
 }
 
-export const updateUsre = async (req,res,next) => {
+export const updateUser = async (req,res,next) => {
     if (req.user.id !== req.params.userId){
         return next(errorHandler(403, 'You are not authorized to perform this action'));
     }
@@ -28,18 +28,18 @@ export const updateUsre = async (req,res,next) => {
         if(!req.body.username.match(/^[a-zA-Z0-9]+$/)){
             return next(errorHandler(400, 'Username must contain only letters and numbers'));
         }
-        try {
-            const updateUser = await User.findByIdAndUpdate(req.params.userId, {
-                $set:{
-                    username: req.body.username,
-                    email: req.body.email,
-                    profilePicture: req.body.profilePicture,
-                    password: req.body.password
-                },
-            },{new: true}); // new: true returns the updated document
-            res.status(200).json(updateUser);
-        } catch (error) {
-            return next(errorHandler(500, 'Error updating user'));
-        }
+    }
+    try {
+        const updateUser = await User.findByIdAndUpdate(req.params.userId, {
+            $set:{
+                username: req.body.username,
+                email: req.body.email,
+                profilePicture: req.body.profilePicture,
+                password: req.body.password
+            },
+        },{new: true}); // new: true returns the updated document
+        res.status(200).json(updateUser);
+    } catch (error) {
+        return next(errorHandler(500, 'Error updating user'));
     }
 }
