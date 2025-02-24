@@ -5,7 +5,7 @@ import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { updateStart,updateSuccess,updateFail } from "../redux/user/userSlice.js";
 import { useDispatch } from "react-redux";
-import { set } from "mongoose";
+// import { set } from "mongoose";
 
 
 export default function DashProfile() {
