@@ -20,15 +20,17 @@ const Signin = () => {
         }
         try {
             dispatch(signInStart());
-            const res = await fetch('/api/auth/signin',{
+            const res = await fetch('/api/auth/login',{
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify(formData),
             });
             const data = await res.json();
             
-            if(data.success === false){
-                dispatch(signInFail(data.message));
+            if(!res.ok || data?.success === false){
+                const msg = data?.error?.message || data?.message || 'Login failed';
+                return dispatch(signInFail(msg));
             }
 
             if(res.ok){

@@ -8,14 +8,14 @@ import Dashboard from "../pages/dashboard";
 import Signin from "../pages/signin";
 import Projects from "../pages/projects";
 import Blog from "../pages/blog";
-import Header from "../src/components/header"
+import HeaderCustom from "../src/components/HeaderCustom"
 import FooterComponent from "./components/footer";
 import PrivateRoute from "./components/PrivateRoute";
 
 const app = () => {
   return(
     <BrowserRouter>
-        <Header/>
+  <HeaderCustom/>
         <Routes>
             <Route path="/" element={<Home/>} ></Route>
             <Route path="/about" element={<About/>} ></Route>

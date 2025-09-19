@@ -2,6 +2,11 @@ import { useEffect,useState } from "react"
 import { useLocation } from "react-router-dom"   //useLocation - a hook that returns the location object that represents the current URL
 import DashSidebar from "../src/components/DashSidebar"
 import DashProfile from "../src/components/DashProfile"
+import AdminCreatePost from "../src/components/AdminCreatePost"
+import AdminCreateProject from "../src/components/AdminCreateProject"
+import AdminLayout from "../src/components/admin/AdminLayout";
+import SectionHeader from "../src/components/admin/SectionHeader";
+import AnalyticsRow from "../src/components/admin/AnalyticsRow";
 
 function Dashboard() {
     const location = useLocation()   //useLocation() - returns the location object that represents the current URL
@@ -15,16 +20,17 @@ function Dashboard() {
     },[location.search]) //useEffect() - a hook that runs side effects, it takes a function and an array of dependencies as arguments
                          //[location.search] - an array of dependencies, useEffect() will run only when the value of location.search changes
     return (
-        <div className='min-h-screen flex flex-col md:flex-row gap-4'>
-            <div className="w-full md:w-64 shrink-0">
-                {/** Sidebar*/}
-                <DashSidebar/>
-            </div>
-            {/** profile....*/}
-            <div className="flex-1">
-                {tab==='profile' && <DashProfile/>}
-            </div>
-        </div>
+        <AdminLayout sidebar={<DashSidebar/>}>
+            {tab==='' && (
+                <>
+                    <SectionHeader title="Blog Dashboard" subtitle="Quick snapshot of your content performance" />
+                    <AnalyticsRow />
+                </>
+            )}
+            {tab==='profile' && <DashProfile/>}
+            {tab==='create-post' && <AdminCreatePost/>}
+            {tab==='create-project' && <AdminCreateProject/>}
+        </AdminLayout>
     )
 }
 

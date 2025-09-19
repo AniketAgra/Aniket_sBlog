@@ -19,17 +19,19 @@ const Signup = () => {
         try {
             setLoading(true);
             setErrorMessage(null);
-            const res = await fetch('/api/auth/signup',{
+            const res = await fetch('/api/auth/register',{
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify(formData),
             });
             const data = await res.json();
 
             setLoading(false);
 
-            if(data.success === false){
-                return setErrorMessage(data.message);
+            if(!res.ok || data?.success === false){
+                const msg = data?.error?.message || data?.message || 'Registration failed';
+                return setErrorMessage(msg);
             }
             
             if(res.ok){

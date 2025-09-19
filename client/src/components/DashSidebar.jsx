@@ -2,8 +2,9 @@ import { Sidebar } from "flowbite-react";
 import { HiArrowSmRight, HiUser } from "react-icons/hi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from "../redux/user/userSlice.js";
+import styles from '../styles/components/DashSidebar.module.css';
 
 
 export default function DashSidebar() {
@@ -11,6 +12,8 @@ export default function DashSidebar() {
     const [tab, setTab] = useState('')   
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { currentUser } = useSelector((s) => s.user);
+    const isAdmin = currentUser?.role === 'admin';
 
     const handleSignOut = async () => {
         try{
@@ -30,14 +33,24 @@ export default function DashSidebar() {
             setTab(tabFromURL);
         }                                                     
     },[location.search]) 
-  return (
-    <Sidebar className="w-full md:w-56">
+    return (
+    <Sidebar className={[styles.sidebarRoot, styles.transparentSidebar].join(' ')}>
         <Sidebar.Items>
-            <Sidebar.ItemGroup>
+            <Sidebar.ItemGroup className="[&>*]:rounded-xl [&>*]:transition-all [&>*]:duration-200">
                 <Link to='/dashboard?tab=profile'>  {/*here we are using the Link component from react-router-dom to navigate to the dashboard page with the tab query parameter set to profile */}
-                    <Sidebar.Item active={tab==='profile'} icon={HiUser} label={"User"} labelColor='dark' as='div'>Profile</Sidebar.Item>
+                    <Sidebar.Item active={tab==='profile'} icon={HiUser} label={"User"} labelColor='dark' as='div' className={styles.hoverItem}>Profile</Sidebar.Item>
                 </Link>
-                <Sidebar.Item icon={HiArrowSmRight}  className='cursor-pointer' onClick={handleSignOut}>Sign Out</Sidebar.Item>
+                                {isAdmin && (
+                                    <>
+                                        <Link to='/dashboard?tab=create-post'>
+                                                <Sidebar.Item active={tab==='create-post'} as='div' className={styles.hoverItem}>Create Post</Sidebar.Item>
+                                        </Link>
+                                        <Link to='/dashboard?tab=create-project'>
+                                                <Sidebar.Item active={tab==='create-project'} as='div' className={styles.hoverItem}>Create Project</Sidebar.Item>
+                                        </Link>
+                                    </>
+                                )}
+                <Sidebar.Item icon={HiArrowSmRight}  className={[styles.hoverItem,'cursor-pointer'].join(' ')} onClick={handleSignOut}>Sign Out</Sidebar.Item>
             </Sidebar.ItemGroup>
         </Sidebar.Items>
     </Sidebar>

@@ -3,8 +3,12 @@ import { signin,signup, google, signout } from "../controllers/auth.controller.j
 
 const router = express.Router();
 
+// Legacy endpoints
 router.post('/signup', signup);
 router.post('/signin', signin);
+// New contract aliases
+router.post('/register', signup);
+router.post('/login', signin);
 router.post('/google', google)
 router.post('/signout', signout)
 

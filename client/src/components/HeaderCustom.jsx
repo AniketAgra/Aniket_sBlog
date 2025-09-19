@@ -1,0 +1,105 @@
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { FaMoon, FaSun } from 'react-icons/fa';
+import { AiOutlineMenu, AiOutlineSearch } from 'react-icons/ai';
+import styles from '../styles/components/HeaderCustom.module.css';
+import { toggleTheme } from '../redux/theme/themeSlice';
+import { signOut } from '../redux/user/userSlice';
+
+export default function HeaderCustom(){
+  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const path = useLocation().pathname;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(s => s.user);
+  const { theme } = useSelector(s => s.theme);
+  const isAdmin = currentUser?.role === 'admin';
+
+  const handleSignOut = async () => {
+    try{
+      const res = await fetch('/api/auth/signout', { method:'POST', credentials:'include' });
+      if(res.ok){
+        dispatch(signOut());
+        setMenuOpen(false);
+        navigate('/signin');
+      }
+    }catch(e){/* no-op */}
+  };
+
+  return (
+    <header className={styles.root}>
+      <div className={styles.container}>
+        <Link to='/' className={styles.brand}>
+          <span className={styles.brandBadge}>Aniket&apos;s</span> Blog
+        </Link>
+
+        {/* Centered desktop nav */}
+        <nav className={styles.desktopNav} aria-label='Primary'>
+          <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
+          <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
+          <Link to='/blog' className={`${styles.navLink} ${path==='/blog' ? styles.active : ''}`}>Blog</Link>
+          <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
+        </nav>
+
+        <div className={styles.controls}>
+          <form className={styles.searchForm} onSubmit={(e)=>e.preventDefault()}>
+            <input className={styles.searchInput} placeholder='Search...' />
+          </form>
+          <button className={`${styles.iconBtn} ${styles.searchIconBtn}`} aria-label='Search'>
+            <AiOutlineSearch />
+          </button>
+          <button className={styles.themeBtn} aria-label='Toggle theme' onClick={()=>dispatch(toggleTheme())}>
+            {theme === 'light' ? <FaSun/> : <FaMoon/>}
+          </button>
+
+          {currentUser ? (
+            <div className={styles.avatarWrap}>
+              <button className={styles.avatarBtn} onClick={()=>setMenuOpen(v=>!v)} aria-haspopup='menu' aria-expanded={menuOpen}>
+                <img className={styles.avatarImg} alt='user' src={currentUser.profilePicture} />
+              </button>
+              <div className={`${styles.menu} ${menuOpen ? styles.menuOpen : ''}`} role='menu'>
+                <div className={styles.menuItem}>@{currentUser.username}</div>
+                <div className={styles.menuItem} style={{opacity:.8}}>@{currentUser.email}</div>
+                <hr className={styles.menuDivider}/>
+                <Link to='/dashboard?tab=profile' className={styles.menuItem} onClick={()=>setMenuOpen(false)}>Profile</Link>
+                <hr className={styles.menuDivider}/>
+                <button className={styles.menuItem} onClick={handleSignOut}>Sign Out</button>
+              </div>
+            </div>
+          ) : (
+            <Link to='/signin'>
+              <button className={styles.signInButton}>Sign In</button>
+            </Link>
+          )}
+
+      <button className={styles.toggleBtn} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
+            <AiOutlineMenu />
+          </button>
+        </div>
+      </div>
+
+    {/* Mobile collapse only */}
+    <nav className={`${styles.collapse} ${open ? styles.open : ''}`}> 
+        <div className={styles.container}>
+          <div className={styles.collapseInner}>
+            <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
+            <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
+            <Link to='/blog' className={`${styles.navLink} ${path==='/blog' ? styles.active : ''}`}>Blog</Link>
+            <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
+            {currentUser && (
+              <Link to='/dashboard?tab=profile' className={`${styles.navLink} ${styles.mobileOnly} ${path.startsWith('/dashboard') ? styles.active : ''}`}>Dashboard</Link>
+            )}
+            {isAdmin && (
+              <>
+                <Link to='/dashboard?tab=create-post' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Post</Link>
+                <Link to='/dashboard?tab=create-project' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Project</Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+    </header>
+  );
+}

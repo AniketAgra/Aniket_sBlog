@@ -2,5 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Subtle dotted grid background for dark theme */
+.bg-grid {
+	background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+	background-size: 18px 18px;
+}
 
+/* Prevent child gradient overlay from covering rounded border */
+.glass-card { isolation: isolate; }
+        
         

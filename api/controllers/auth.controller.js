@@ -4,7 +4,7 @@ import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, name } = req.body;
 
     if (!username || !email || !password) {
         return next(errorHandler(400, 'All Fields are mandatory.'));
@@ -13,7 +13,7 @@ export const signup = async (req, res, next) => {
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
     try {
-        const newUser = await User.create({ username, email, password: hashedPassword });
+        const newUser = await User.create({ username, name: name || username, email, password: hashedPassword, passwordHash: hashedPassword, role: 'user' });
         res.status(200).json({ user: newUser._id });
     } catch (error) {
         next(error);
@@ -43,7 +43,7 @@ export const signin = async (req, res, next) => {
         const { password: pass, ...rest } = validUser._doc;
 
         const token = jwt.sign(
-            { _id: validUser._id },
+            { id: validUser._id, role: validUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -70,7 +70,7 @@ export const google = async (req, res, next) => {
 
         if (user) {
             const token = jwt.sign(
-                { _id: user._id },
+                { id: user._id, role: user.role },
                 process.env.JWT_SECRET,
                 { expiresIn: '7d' }
             );
@@ -102,15 +102,18 @@ export const google = async (req, res, next) => {
 
         const newUser = new User({
             username: newUsername,
+            name: name || newUsername,
             email,
             password: hashedPassword,
+            passwordHash: hashedPassword,
             profilePicture: googlePhotoUrl,
+            role: 'user',
         });
 
         await newUser.save();
 
         const token = jwt.sign(
-            { _id: newUser._id },
+            { id: newUser._id, role: newUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );

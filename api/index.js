@@ -7,6 +7,10 @@ import userRoutes from '../api/routes/user.route.js';
 import authRoutes from '../api/routes/auth.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import helmet from 'helmet';
+import adminRoutes from '../api/routes/admin.route.js';
+import publicRoutes from '../api/routes/public.route.js';
+import uploadRoutes from '../api/routes/upload.route.js';
 
 // Load env from api/.env, and if not found, try project root ../.env
 dotenv.config();
@@ -34,6 +38,7 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
+app.use(helmet());
 // CORS for dev frontends (5173/5175) and optional FRONTEND_URL env
 const allowedOrigins = [
     process.env.FRONTEND_URL,
@@ -51,9 +56,18 @@ app.use(cors({
     credentials: true,
 }));
 
+// Static file serving for uploads
+import { fileURLToPath as __f } from 'url';
+const __filename2 = __f(import.meta.url);
+const __dirname2 = path.dirname(__filename2);
+app.use('/uploads', express.static(path.resolve(__dirname2, './uploads')));
+
 // Routes
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', publicRoutes);
+app.use('/api', uploadRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
