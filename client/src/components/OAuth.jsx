@@ -20,16 +20,21 @@ export default function OAuth() {
             const response = await fetch('/api/auth/google',{
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ 
                     name: resultFromGoogle.user.displayName, 
                     email: resultFromGoogle.user.email,
                     googlePhotoUrl: resultFromGoogle.user.photoURL
                 }),
             });
-            const data = await response.json();
+            // Safely parse JSON (server might return empty body on error)
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : null;
             if(response.ok){
                 dispatch(signInSuccess(data));
                 navigate('/');
+            } else {
+                console.error('Google auth failed', data);
             }
         } catch (error) {
             console.error(error);

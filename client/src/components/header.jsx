@@ -5,6 +5,7 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon,FaSun } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../redux/theme/themeSlice';
+import { signOut } from '../redux/user/userSlice';
 
 export default function Header() {
     const path = useLocation().pathname;
@@ -12,6 +13,18 @@ export default function Header() {
     const {theme} = useSelector(state => state.theme);
 
     const dispatch = useDispatch();
+
+    const handleSignOut = async () => {
+        try{
+            const res = await fetch('/api/auth/signout', { method:'POST', credentials:'include' });
+            // ignore body; if ok, clear local state
+            if(res.ok){
+                dispatch(signOut());
+            }
+        }catch(e){
+            // no-op, could add an alert
+        }
+    };
 
     return (
         <Navbar className="border-b-2">
@@ -64,9 +77,7 @@ export default function Header() {
                         </Link>
                         <Dropdown.Divider />
                         
-                        <Dropdown.Item>
-                            Sign Out
-                        </Dropdown.Item>
+                        <Dropdown.Item onClick={handleSignOut}>Sign Out</Dropdown.Item>
                     </Dropdown>
                     ):
                     (
@@ -103,6 +114,14 @@ export default function Header() {
                     </Link>
                 </Navbar.Link>
                 <Navbar.Link as={'div'}>
+                    <Link
+                        to='/blog'
+                        className={`block px-3 py-2 rounded-md ${path === '/blog' ? 'bg-blue-500 text-white' : 'text-gray-700'} lg:bg-transparent lg:text-gray-900 lg:hover:text-blue-500`}
+                    >
+                        Blog
+                    </Link>
+                </Navbar.Link>
+                <Navbar.Link as={'div'}>
                     <Link 
                         to='/projects'
                         className={`block px-3 py-2 rounded-md ${path === '/projects' ? 'bg-blue-500 text-white' : 'text-gray-700'} lg:bg-transparent lg:text-gray-900 lg:hover:text-blue-500`}
@@ -125,6 +144,12 @@ export default function Header() {
                     className={`text-gray-900 ${path === '/about' ? 'text-blue-500 font-semibold' : 'hover:text-blue-500'}`}
                 >
                     About
+                </Link>
+                <Link 
+                    to='/blog' 
+                    className={`text-gray-900 ${path === '/blog' ? 'text-blue-500 font-semibold' : 'hover:text-blue-500'}`}
+                >
+                    Blog
                 </Link>
                 <Link 
                     to='/projects' 

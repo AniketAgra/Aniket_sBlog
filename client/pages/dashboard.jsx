@@ -15,13 +15,15 @@ function Dashboard() {
     },[location.search]) //useEffect() - a hook that runs side effects, it takes a function and an array of dependencies as arguments
                          //[location.search] - an array of dependencies, useEffect() will run only when the value of location.search changes
     return (
-        <div className='min-h-screen flex flex-row md:flex-row'>
-            <div className="">
+        <div className='min-h-screen flex flex-col md:flex-row gap-4'>
+            <div className="w-full md:w-64 shrink-0">
                 {/** Sidebar*/}
                 <DashSidebar/>
             </div>
-            {/** prodile....*/}
-            {tab==='profile' && <DashProfile/>}
+            {/** profile....*/}
+            <div className="flex-1">
+                {tab==='profile' && <DashProfile/>}
+            </div>
         </div>
     )
 }

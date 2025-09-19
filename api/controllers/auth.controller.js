@@ -1,104 +1,148 @@
-import User from '../models/user.model.js'
+import User from '../models/user.model.js';
 import bcryptjs from "bcryptjs";
 import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
-export const signup = async(req,res,next) => {
-    const {username, email, password} = req.body;
+export const signup = async (req, res, next) => {
+    const { username, email, password } = req.body;
 
-    if(!username || !email || !password || username === '' || email === '' || password === ''){
-        next(errorHandler(400,'All Fields are mandatory.'))
+    if (!username || !email || !password) {
+        return next(errorHandler(400, 'All Fields are mandatory.'));
     }
 
-    const hashedPassword = bcryptjs.hashSync(password,10);
+    const hashedPassword = bcryptjs.hashSync(password, 10);
 
     try {
-        const newUser = await User.create({username, email, password: hashedPassword});
-        res.status(200).json({user: newUser._id});
+        const newUser = await User.create({ username, email, password: hashedPassword });
+        res.status(200).json({ user: newUser._id });
     } catch (error) {
         next(error);
     }
-}
+};
 
 export const signin = async (req, res, next) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
-    if(!email || !password || email === '' || password === ''){
-        next(errorHandler(400, 'All Fields are required'));
+    if (!email || !password) {
+        return next(errorHandler(400, 'All Fields are required.'));
     }
 
     try {
-        const validUser = await User.findOne({email});
+        const validUser = await User.findOne({ email });
 
-        if(!validUser){
+        if (!validUser) {
             return next(errorHandler(404, "Invalid Username or Password"));
         }
 
         const validPassword = bcryptjs.compareSync(password, validUser.password);
 
-        if(!validPassword){
+        if (!validPassword) {
             return next(errorHandler(400, 'Invalid Username or Password'));
         }
 
-        const {password: pass, ...rest} = validUser._doc;
+        const { password: pass, ...rest } = validUser._doc;
 
         const token = jwt.sign(
-            {userId: validUser._id},
+            { _id: validUser._id },
             process.env.JWT_SECRET,
-    
-        )
-        res.status(200).cookie('access_token',token,{
-            httpOnly: true}).json(rest);
-        
+            { expiresIn: '7d' }
+        );
+
+                res
+                    .status(200)
+                    .cookie('access_token', token, {
+                        httpOnly: true,
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                    })
+                    .json(rest);
 
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
 
 export const google = async (req, res, next) => {
     const { email, name, googlePhotoUrl } = req.body;
+
     try {
-      const user = await User.findOne({ email });
-      if (user) {
-        const token = jwt.sign(
-          { id: user._id, isAdmin: user.isAdmin },
-          process.env.JWT_SECRET
-        );
-        const { password, ...rest } = user._doc;
-        res
-          .status(200)
-          .cookie('access_token', token, {
-            httpOnly: true,
-          })
-          .json(rest);
-      } else {
+        let user = await User.findOne({ email });
+
+        if (user) {
+            const token = jwt.sign(
+                { _id: user._id },
+                process.env.JWT_SECRET,
+                { expiresIn: '7d' }
+            );
+            const { password, ...rest } = user._doc;
+
+                        return res
+                            .status(200)
+                            .cookie('access_token', token, {
+                                httpOnly: true,
+                                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                                secure: process.env.NODE_ENV === 'production',
+                            })
+                            .json(rest);
+        }
+
+        let newUsername;
+        let isUsernameTaken = true;
+
+        while (isUsernameTaken) {
+            newUsername = name.toLowerCase().split(' ').join('') + Math.random().toString(9).slice(-4);
+            const existingUser = await User.findOne({ username: newUsername });
+            if (!existingUser) isUsernameTaken = false;
+        }
+
         const generatedPassword =
-          Math.random().toString(36).slice(-8) +  //generating random password , toString(36) converts number to base 36, slice(-8) takes last 8 characters
-          Math.random().toString(36).slice(-8);
+            Math.random().toString(36).slice(-8) +
+            Math.random().toString(36).slice(-8);
         const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+
         const newUser = new User({
-          username:
-            name.toLowerCase().split(' ').join('') +
-            Math.random().toString(9).slice(-4),
-          email,
-          password: hashedPassword,
-          profilePicture: googlePhotoUrl,
+            username: newUsername,
+            email,
+            password: hashedPassword,
+            profilePicture: googlePhotoUrl,
         });
+
         await newUser.save();
+
         const token = jwt.sign(
-          { id: newUser._id, isAdmin: newUser.isAdmin },
-          process.env.JWT_SECRET
+            { _id: newUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
         );
+
         const { password, ...rest } = newUser._doc;
-        res
-          .status(200)
-          .cookie('access_token', token, {
-            httpOnly: true,
-          })
-          .json(rest);
-      }
+
+                res
+                    .status(200)
+                    .cookie('access_token', token, {
+                        httpOnly: true,
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                    })
+                    .json(rest);
+
     } catch (error) {
-      next(error);
+        next(error);
     }
-  };
+};
+
+export const signout = async (req, res, next) => {
+        try {
+                res
+                    .clearCookie('access_token', {
+                        httpOnly: true,
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                        secure: process.env.NODE_ENV === 'production',
+                        path: '/',
+                    })
+                    .status(200)
+                    .json({ message: 'Signed out successfully' });
+        } catch (error) {
+                next(error);
+        }
+};

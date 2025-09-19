@@ -7,6 +7,7 @@ import Signup from "../pages/signup";
 import Dashboard from "../pages/dashboard";
 import Signin from "../pages/signin";
 import Projects from "../pages/projects";
+import Blog from "../pages/blog";
 import Header from "../src/components/header"
 import FooterComponent from "./components/footer";
 import PrivateRoute from "./components/PrivateRoute";
@@ -18,6 +19,7 @@ const app = () => {
         <Routes>
             <Route path="/" element={<Home/>} ></Route>
             <Route path="/about" element={<About/>} ></Route>
+            <Route path="/blog" element={<Blog/>} ></Route>
             <Route path="/signup" element={<Signup/>} ></Route>
             <Route path="/signin" element={<Signin/>} ></Route>
             <Route element={<PrivateRoute/>}>      
