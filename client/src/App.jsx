@@ -8,6 +8,7 @@ import Dashboard from "../pages/dashboard";
 import Signin from "../pages/signin";
 import Projects from "../pages/projects";
 import Blog from "../pages/blog";
+import BlogPost from "../pages/blog";
 import HeaderCustom from "../src/components/HeaderCustom"
 import FooterComponent from "./components/footer";
 import PrivateRoute from "./components/PrivateRoute";
@@ -20,6 +21,7 @@ const app = () => {
             <Route path="/" element={<Home/>} ></Route>
             <Route path="/about" element={<About/>} ></Route>
             <Route path="/blog" element={<Blog/>} ></Route>
+            <Route path="/blog/:slug" element={<BlogPost/>} ></Route>
             <Route path="/signup" element={<Signup/>} ></Route>
             <Route path="/signin" element={<Signin/>} ></Route>
             <Route element={<PrivateRoute/>}>      

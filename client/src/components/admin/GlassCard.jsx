@@ -5,7 +5,7 @@ export default function GlassCard({ as: Tag = 'div', className = '', children })
   return (
     <Tag
       className={[
-        'glass-card relative rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md',
+        'glass-card relative rounded-2xl border border-white/10 p-3 bg-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md',
         'ring-1 ring-inset ring-white/5 hover:ring-white/10 transition-all duration-300',
         'hover:translate-y-[-2px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)]',
         className,

@@ -105,6 +105,21 @@ export const listPosts = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+export const listProjects = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, language, tag } = req.query;
+    const filter = {};
+    if (language) filter.languages = language;
+    if (tag) filter.tags = tag;
+    const docs = await Project.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((+page - 1) * +limit)
+      .limit(+limit);
+    const count = await Project.countDocuments(filter);
+    res.json({ items: docs, page: +page, total: count });
+  } catch (e) { next(e); }
+};
+
 // Public: Get Post by id or slug
 export const getPost = async (req, res, next) => {
   try {

@@ -8,9 +8,11 @@ import authRoutes from '../api/routes/auth.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
-import adminRoutes from '../api/routes/admin.route.js';
-import publicRoutes from '../api/routes/public.route.js';
+import adminRoutes from '../api/routes/admin.js';
+import publicPostsRoutes from '../api/routes/publicPosts.js';
+import publicProjectsRoutes from '../api/routes/publicProjects.js';
 import uploadRoutes from '../api/routes/upload.route.js';
+import resumeRoutes from '../api/routes/resume.route.js';
 
 // Load env from api/.env, and if not found, try project root ../.env
 dotenv.config();
@@ -61,13 +63,17 @@ import { fileURLToPath as __f } from 'url';
 const __filename2 = __f(import.meta.url);
 const __dirname2 = path.dirname(__filename2);
 app.use('/uploads', express.static(path.resolve(__dirname2, './uploads')));
+// Optional api/static for serving generic assets (not used for resume since it's protected)
+app.use('/static', express.static(path.resolve(__dirname2, './static')));
 
 // Routes
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api', publicRoutes);
+app.use('/api', publicPostsRoutes);
+app.use('/api', publicProjectsRoutes);
 app.use('/api', uploadRoutes);
+app.use('/api', resumeRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

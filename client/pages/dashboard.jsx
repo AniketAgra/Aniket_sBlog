@@ -7,6 +7,7 @@ import AdminCreateProject from "../src/components/AdminCreateProject"
 import AdminLayout from "../src/components/admin/AdminLayout";
 import SectionHeader from "../src/components/admin/SectionHeader";
 import AnalyticsRow from "../src/components/admin/AnalyticsRow";
+import ResumeDownloadsPanel from "../src/components/admin/ResumeDownloadsPanel";
 
 function Dashboard() {
     const location = useLocation()   //useLocation() - returns the location object that represents the current URL
@@ -25,6 +26,7 @@ function Dashboard() {
                 <>
                     <SectionHeader title="Blog Dashboard" subtitle="Quick snapshot of your content performance" />
                     <AnalyticsRow />
+                    <ResumeDownloadsPanel />
                 </>
             )}
             {tab==='profile' && <DashProfile/>}

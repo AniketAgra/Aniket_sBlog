@@ -9,6 +9,9 @@
 }
 
 /* Prevent child gradient overlay from covering rounded border */
-.glass-card { isolation: isolate; }
+.glass-card { 
+	
+	box-sizing: border-box
+}
         
         

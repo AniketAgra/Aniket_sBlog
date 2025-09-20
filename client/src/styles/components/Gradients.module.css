@@ -1,0 +1,37 @@
+/* Gradient Utilities */
+
+/* Chip Gradients */
+.chipGradient1 { background: linear-gradient(to right, rgb(6 182 212), rgb(139 92 246), rgb(236 72 153)); }
+.chipGradient2 { background: linear-gradient(to right, rgb(16 185 129), rgb(20 184 166), rgb(6 182 212)); }
+.chipGradient3 { background: linear-gradient(to right, rgb(245 158 11), rgb(249 115 22), rgb(244 63 94)); }
+.chipGradient4 { background: linear-gradient(to right, rgb(99 102 241), rgb(168 85 247), rgb(236 72 153)); }
+.chipGradient5 { background: linear-gradient(to right, rgb(14 165 233), rgb(59 130 246), rgb(99 102 241)); }
+.chipGradient6 { background: linear-gradient(to right, rgb(236 72 153), rgb(244 63 94), rgb(249 115 22)); }
+.chipGradient7 { background: linear-gradient(to right, rgb(132 204 22), rgb(16 185 129), rgb(20 184 166)); }
+.chipGradient8 { background: linear-gradient(to right, rgb(139 92 246), rgb(236 72 153), rgb(244 63 94)); }
+.chipGradient9 { background: linear-gradient(to right, rgb(244 63 94), rgb(249 115 22), rgb(250 204 21)); }
+.chipGradient10 { background: linear-gradient(to right, rgb(45 212 191), rgb(6 182 212), rgb(59 130 246)); }
+
+/* Card Border Gradients */
+.cardBorder1 { background: linear-gradient(135deg, rgb(52 211 153 / 0.4), rgb(139 92 246 / 0.4), rgb(236 72 153 / 0.4)); }
+.cardBorder2 { background: linear-gradient(135deg, rgb(34 197 194 / 0.4), rgb(59 130 246 / 0.4), rgb(99 102 241 / 0.4)); }
+.cardBorder3 { background: linear-gradient(135deg, rgb(251 113 133 / 0.4), rgb(251 146 60 / 0.4), rgb(251 191 36 / 0.4)); }
+.cardBorder4 { background: linear-gradient(135deg, rgb(244 114 182 / 0.4), rgb(139 92 246 / 0.4), rgb(56 189 248 / 0.4)); }
+.cardBorder5 { background: linear-gradient(135deg, rgb(45 212 191 / 0.4), rgb(52 211 153 / 0.4), rgb(163 230 53 / 0.4)); }
+.cardBorder6 { background: linear-gradient(135deg, rgb(168 85 247 / 0.4), rgb(236 72 153 / 0.4), rgb(244 63 94 / 0.4)); }
+.cardBorder7 { background: linear-gradient(135deg, rgb(250 204 21 / 0.4), rgb(251 191 36 / 0.4), rgb(251 146 60 / 0.4)); }
+.cardBorder8 { background: linear-gradient(135deg, rgb(59 130 246 / 0.4), rgb(99 102 241 / 0.4), rgb(139 92 246 / 0.4)); }
+
+/* Utility Classes */
+.textGradient {
+  background: linear-gradient(to right, white, rgb(209 213 219));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.glassEffect {
+  background-color: rgb(255 255 255 / 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}

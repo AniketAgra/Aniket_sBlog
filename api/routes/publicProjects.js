@@ -1,6 +1,7 @@
 import express from 'express';
 import { authOptional } from '../middleware/authOptional.js';
 import {
+  listProjects,
   getProject,
   likeProject,
   commentOnProject,
@@ -8,6 +9,7 @@ import {
 
 const router = express.Router();
 
+router.get('/projects', listProjects);
 router.get('/projects/:id', getProject);
 router.post('/projects/:id/like', authOptional, likeProject);
 router.post('/projects/:id/comments', authOptional, commentOnProject);

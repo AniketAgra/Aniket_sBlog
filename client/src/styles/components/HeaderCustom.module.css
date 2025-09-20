@@ -12,14 +12,19 @@
 .container {
   max-width: 80rem; /* 1280px */
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .75rem;
+  gap: 1rem;
+  min-height: 4rem;
 }
 @media (min-width: 1024px) {
-  .container { display: grid; grid-template-columns: auto 1fr auto; }
+  .container { 
+    display: grid; 
+    grid-template-columns: auto 1fr auto;
+    padding: 1rem;
+  }
 }
 
 .brand {
