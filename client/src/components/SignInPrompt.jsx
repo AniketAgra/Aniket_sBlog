@@ -1,52 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import styles from '../styles/components/SignInPrompt.module.css';
 
-function SignInPrompt({ onClose, message }) {
+function SignInPrompt({ onClose, message, title = 'Unlock Full Access' }) {
   return (
-    <div style={{
-      marginTop: '1rem',
-      border: '1px solid #e5e7eb',
-      borderRadius: '0.5rem',
-      padding: '1rem',
-      background: '#fafafa'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
-        <div>
-          <div style={{ fontWeight: 600 }}>Sign in to see more</div>
-          <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>{message}</div>
+    <div className={styles.card} role="region" aria-label="Sign-in prompt">
+      <div className={styles.headerRow}>
+        <div className={styles.textWrap}>
+          <div className={styles.title}>{title}</div>
+          {message && <div className={styles.desc}>{message}</div>}
         </div>
         {onClose && (
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            style={{
-              border: '1px solid #e5e7eb',
-              background: 'white',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '0.375rem',
-              cursor: 'pointer'
-            }}
-          >
+          <button type="button" aria-label="Close" onClick={onClose} className={styles.closeBtn}>
             ✕
           </button>
         )}
       </div>
-      <div style={{ marginTop: '0.75rem' }}>
-        <Link
-          to="/signin"
-          style={{
-            display: 'inline-block',
-            background: '#111827',
-            color: 'white',
-            padding: '0.5rem 0.75rem',
-            borderRadius: '0.375rem',
-            textDecoration: 'none',
-            fontWeight: 600
-          }}
-        >
-          Go to Sign in
+      <div className={styles.actions}>
+        <Link to="/signup" className={styles.primaryBtn} aria-label="Create Account">
+          {/* simple inline svg icon to avoid extra deps */}
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.buttonIcon}>
+            <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5Z" fill="currentColor"/>
+          </svg>
+          Create Account
+        </Link>
+        <Link to="/signin" className={styles.secondaryBtn} aria-label="Log In">
+          Log In
         </Link>
       </div>
     </div>
@@ -55,6 +35,8 @@ function SignInPrompt({ onClose, message }) {
 
 SignInPrompt.propTypes = {
   onClose: PropTypes.func,
+  message: PropTypes.string,
+  title: PropTypes.string,
 };
 
 export default SignInPrompt;

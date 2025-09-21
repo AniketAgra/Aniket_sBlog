@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import SignInPrompt from '../src/components/SignInPrompt';
 
 export default function Projects() {
   const [state, setState] = useState({ items: [], loading: true, error: null });
+  const [showAll, setShowAll] = useState(false); // initially show only 3
+  const [showPrompt, setShowPrompt] = useState(false);
+  const currentUser = useSelector(s => s.user?.currentUser);
 
   useEffect(() => {
     const load = async () => {
@@ -17,6 +22,11 @@ export default function Projects() {
     load();
   }, []);
 
+  const visibleItems = useMemo(() => {
+    if (currentUser || showAll) return state.items;
+    return state.items.slice(0, 3);
+  }, [state.items, currentUser, showAll]);
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       <header className="mb-6 sm:mb-8">
@@ -26,7 +36,7 @@ export default function Projects() {
       {state.loading && <div className="text-gray-400">Loading…</div>}
       {state.error && <div className="text-red-400">{state.error}</div>}
       <div className="grid gap-5 sm:gap-6 md:gap-7 sm:grid-cols-2 lg:grid-cols-3">
-        {state.items.map(p => (
+        {visibleItems.map(p => (
           <div key={p._id} className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10">
             {p.coverImageUrl && <img src={p.coverImageUrl} alt={p.title} className="h-44 sm:h-48 w-full object-cover"/>}
             <div className="px-4 sm:px-5 py-4">
@@ -41,6 +51,42 @@ export default function Projects() {
           </div>
         ))}
       </div>
+
+      {/* Show more button: appears when there are more than 3 items and not yet expanded */}
+      {state.items.length > 3 && !showAll && !state.loading && !state.error && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (currentUser) setShowAll(true);
+              else setShowPrompt(true);
+            }}
+            style={{
+              background: '#111827',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            Show more
+          </button>
+        </div>
+      )}
+
+      {/* Inline sign-in prompt when trying to expand while logged out */}
+      {showPrompt && !currentUser && (
+        <div className="mt-6 flex justify-center">
+          <div className="w-full max-w-2xl">
+            <SignInPrompt
+              message="Create a free account or sign in to view all projects."
+              onClose={() => setShowPrompt(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

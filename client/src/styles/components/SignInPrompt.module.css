@@ -1,0 +1,134 @@
+/* Glassy prompt card inspired by the provided design */
+.card {
+  margin-top: 1.25rem; /* ~20px */
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  color: #e5e7eb; /* neutral-200 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center the text block */
+  gap: 0.75rem;
+  position: relative; /* allow absolute close button */
+  padding-right: 2.25rem; /* reserve space so X doesn't overlap text */
+}
+
+.textWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center; /* center text */
+  text-align: center;
+}
+
+.title {
+  color: #f3f4f6; /* neutral-100 */
+  font-weight: 700;
+  font-size: 1.25rem; /* text-xl */
+  line-height: 1.75rem;
+  padding-left: 2rem;
+}
+
+.desc {
+  color: #a1a1aa; /* zinc-400 */
+  font-size: 0.95rem;
+  padding-left: 2rem;
+}
+
+.closeBtn {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2);
+  color: #e5e7eb;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+  position: absolute; /* keep X on the right while content is centered */
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.closeBtn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.actions {
+  margin-top: 0.9rem;
+  /* margin-left: -10rem; */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center the buttons */
+  gap: 0.75rem;
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #9333ea 100%);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 16px rgba(147, 51, 234, 0.35);
+  transition: transform 0.08s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.primaryBtn:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 10px 20px rgba(147, 51, 234, 0.45);
+}
+
+.primaryBtn:active { transform: translateY(1px); }
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  color: #e5e7eb;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.2s ease, transform 0.08s ease, border-color 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.secondaryBtn:active { transform: translateY(1px); }
+
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Light theme fallback where page background is light */
+@media (prefers-color-scheme: light) {
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75));
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #111827;
+  }
+  .title { color: #111827; }
+  .desc { color: #4b5563; }
+  .closeBtn { color: #111827; background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+  .secondaryBtn { color: #111827; background: rgba(17,24,39,0.04); border-color: rgba(0,0,0,0.12); }
+}
