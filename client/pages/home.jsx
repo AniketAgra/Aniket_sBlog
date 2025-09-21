@@ -6,6 +6,34 @@ export default function Home() {
     const [state, setState] = useState({ items: [], loading: true, error: null });
     const navigate = useNavigate();
     const [projectsState, setProjectsState] = useState({ items: [], loading: true, error: null });
+    // Newsletter subscribe UI state
+    const [email, setEmail] = useState('');
+    const [subStatus, setSubStatus] = useState({ loading: false, message: null, error: null });
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        const emailOk = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email.trim());
+        if (!emailOk) {
+            setSubStatus({ loading: false, message: null, error: 'Please enter a valid email.' });
+            return;
+        }
+        try {
+            setSubStatus({ loading: true, message: null, error: null });
+            const res = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, source: 'home' })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data?.message || 'Subscription failed');
+            }
+            setSubStatus({ loading: false, message: data?.message || 'Subscribed successfully.', error: null });
+            setEmail('');
+        } catch (err) {
+            setSubStatus({ loading: false, message: null, error: err.message || 'Something went wrong. Try again.' });
+        }
+    };
 
     useEffect(() => {
         const load = async () => {
@@ -62,7 +90,7 @@ export default function Home() {
     }, [projectsState.items]);
 
     const featuredProject = topProjects[0];
-    const otherTopProjects = topProjects.slice(1, 4);
+    const otherTopProjects = topProjects.slice(1, 3);
 
     return (
         <div className={styles.homeRoot}>
@@ -153,55 +181,6 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* Projects section */}
-                <h2 className={styles.sectionTitle} style={{ marginTop: '2.75rem' }}>Projects</h2>
-                {projectsState.loading && <div className={styles.empty}>Loading…</div>}
-                {projectsState.error && <div className={styles.empty}>Error: {projectsState.error}</div>}
-
-                {!projectsState.loading && !projectsState.error && topProjects.length > 0 && (
-                    <div className={styles.projectsGrid}>
-                        {/* Left: featured most-liked project */}
-                        {featuredProject && (
-                            <a href={featuredProject.demoUrl || featuredProject.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectFeature}>
-                                {featuredProject.coverImageUrl && (
-                                    <div className={styles.projectFeatureMedia}>
-                                        <img src={featuredProject.coverImageUrl} alt={featuredProject.title} />
-                                    </div>
-                                )}
-                                <div className={styles.projectFeatureBody}>
-                                    <div className={styles.tileMeta}>{new Date(featuredProject.createdAt).toLocaleDateString()}</div>
-                                    <h3 className={styles.tileTitle} style={{ fontSize: '1.25rem' }}>{featuredProject.title}</h3>
-                                    {featuredProject.tagline && <p className={styles.tileDesc}>{featuredProject.tagline}</p>}
-                                    <div className={styles.tileMeta}>
-                                        {(typeof featuredProject.likes === 'number' ? `${featuredProject.likes} likes` : '')}
-                                        {featuredProject.views ? ` · ${featuredProject.views} views` : ''}
-                                    </div>
-                                </div>
-                            </a>
-                        )}
-
-                        {/* Right: remaining top 3 stacked */}
-                        <div className={styles.projectList}>
-                            {otherTopProjects.map(p => (
-                                <a key={p._id} href={p.demoUrl || p.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectListItem}>
-                                    {p.coverImageUrl && (
-                                        <div className={styles.projectThumb}><img src={p.coverImageUrl} alt={p.title} /></div>
-                                    )}
-                                    <div className={styles.projectListBody}>
-                                        <div className={styles.tileMeta}>{new Date(p.createdAt).toLocaleDateString()}</div>
-                                        <h4 className={styles.tileTitle}>{p.title}</h4>
-                                        {p.tagline && <p className={styles.tileDesc}>{p.tagline}</p>}
-                                        <div className={styles.tileMeta}>
-                                            {(typeof p.likes === 'number' ? `${p.likes} likes` : '')}
-                                            {p.views ? ` · ${p.views} views` : ''}
-                                        </div>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 {/* Author spotlight section */}
                 <section aria-labelledby="author-spotlight" style={{ marginTop: '3rem', background: '#1f1630', borderRadius: '14px', padding: '24px 20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
@@ -227,6 +206,137 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+
+                {/* Projects section */}
+                <h2 className={styles.sectionTitle} style={{ marginTop: '2.75rem' }}>Featured Projects</h2>
+                {projectsState.loading && <div className={styles.empty}>Loading…</div>}
+                {projectsState.error && <div className={styles.empty}>Error: {projectsState.error}</div>}
+
+                {!projectsState.loading && !projectsState.error && topProjects.length > 0 && (
+                    <div className={styles.projectsGrid}>
+                        {/* Left: featured most-liked project */}
+                        {featuredProject && (
+                            <a href={featuredProject.demoUrl || featuredProject.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectFeature}>
+                                
+                                <div className={styles.projectFeatureMedia}>
+                                    {featuredProject.coverImageUrl ? (
+                                        <img src={featuredProject.coverImageUrl} alt={featuredProject.title} />
+                                    ) : (
+                                        <div className={styles.projectThumbPlaceholder} aria-hidden="true">★</div>
+                                    )}
+                                </div>
+                                
+                                <div className={styles.projectFeatureBody}>
+                                    {/* Persistent Most Liked badge */}
+                                    <span className={styles.badgeMostLiked}>MOST LIKED</span>
+                                    <div className={styles.tileMeta1}>
+                                        {new Date(featuredProject.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <h3 className={styles.tileTitle} style={{ fontSize: '1.25rem' }}>{featuredProject.title}</h3>
+                                    {featuredProject.tagline && <p className={styles.tileDesc1}>{featuredProject.tagline}</p>}
+                                    <div className={styles.tileMeta}>
+                                        {(typeof featuredProject.likes === 'number' ? `${featuredProject.likes} likes` : '')}
+                                        {featuredProject.views ? ` · ${featuredProject.views} views` : ''}
+                                    </div>
+                                </div>
+                            </a>
+                        )}
+
+                        {/* Right: remaining top 3 stacked */}
+                        <div className={styles.projectList}>
+                            {otherTopProjects.map(p => (
+                                <a key={p._id} href={p.demoUrl || p.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectListItem}>
+                                    {p.coverImageUrl ? (
+                                        <div className={styles.projectThumb}><img src={p.coverImageUrl} alt={p.title} /></div>
+                                    ) : (
+                                        <div className={styles.projectThumbPlaceholder} aria-hidden="true">■</div>
+                                    )}
+                                    <div className={styles.projectListBody}>
+                                        {/* <div className={styles.tileMeta}>{new Date(p.createdAt).toLocaleDateString()}</div> */}
+                                        <h4 className={styles.tileTitle}>{p.title}</h4>
+                                        {p.tagline && <p className={styles.tileDesc}>{p.tagline}</p>}
+                                        {/* <div className={styles.tileMeta}>
+                                            {(typeof p.likes === 'number' ? `${p.likes} likes` : '')}
+                                            {p.views ? ` · ${p.views} views` : ''}
+                                        </div> */}
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Newsletter subscribe section */}
+                <section aria-labelledby="newsletter-title" style={{
+                    marginTop: '2.75rem',
+                    background: 'linear-gradient(180deg, #24143c 0%, #16243a 100%)',
+                    borderRadius: '16px',
+                    padding: '48px 20px',
+                    textAlign: 'center'
+                }}>
+                    <h2 id="newsletter-title" style={{
+                        margin: 0,
+                        color: '#e2e8f0',
+                        fontSize: '1.875rem',
+                        lineHeight: 1.2,
+                        fontWeight: 800
+                    }}>Stay Updated</h2>
+                    <p style={{
+                        margin: '10px 0 22px 0',
+                        color: '#9aa3b2'
+                    }}>Get the latest articles and insights delivered to your inbox.</p>
+
+                    <form onSubmit={handleSubscribe} style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'stretch',
+                            width: 'min(560px, 100%)',
+                            background: '#1c1730',
+                            borderRadius: '9px',
+                            overflow: 'hidden',
+                            border: '1px solid #2c2347'
+                        }}>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter your email"
+                                aria-label="Email address"
+                                style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    background: 'transparent',
+                                    color: '#e2e8f0',
+                                    border: 'none',
+                                    outline: 'none',
+                                    padding: '14px 16px'
+                                }}
+                            />
+                            <button
+                                type="submit"
+                                disabled={subStatus.loading}
+                                style={{
+                                    background: '#8b5cf6',
+                                    color: '#ffffff',
+                                    fontWeight: 700,
+                                    border: 'none',
+                                    padding: '0 18px',
+                                    cursor: subStatus.loading ? 'wait' : 'pointer'
+                                }}
+                            >
+                                {subStatus.loading ? 'Subscribing…' : 'Subscribe'}
+                            </button>
+                        </div>
+                    </form>
+                    {subStatus.error && (
+                        <div role="alert" style={{ color: '#fca5a5', marginTop: 12 }}>{subStatus.error}</div>
+                    )}
+                    {subStatus.message && (
+                        <div style={{ color: '#86efac', marginTop: 12 }}>{subStatus.message}</div>
+                    )}
+                </section>
+
+                
             </div>
         </div>
     );

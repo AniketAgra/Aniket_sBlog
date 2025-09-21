@@ -13,6 +13,10 @@ import publicPostsRoutes from '../api/routes/publicPosts.js';
 import publicProjectsRoutes from '../api/routes/publicProjects.js';
 import uploadRoutes from '../api/routes/upload.route.js';
 import resumeRoutes from '../api/routes/resume.route.js';
+import newsletterRoutes from '../api/routes/newsletter.route.js';
+// Fallback direct bindings in case router import fails silently in some environments
+import { subscribe as subscribeController, verifySubscription as verifySubscriptionController } from '../api/controllers/newsletter.controller.js';
+import apiRateLimiter from '../api/middleware/rateLimiter.js';
 
 // Load env from api/.env, and if not found, try project root ../.env
 dotenv.config();
@@ -74,6 +78,11 @@ app.use('/api', publicPostsRoutes);
 app.use('/api', publicProjectsRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', resumeRoutes);
+app.use('/api', newsletterRoutes);
+
+// Explicit endpoints to ensure availability (keeps same paths)
+app.post('/api/subscribe', apiRateLimiter, subscribeController);
+app.get('/api/subscribe/verify', verifySubscriptionController);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
