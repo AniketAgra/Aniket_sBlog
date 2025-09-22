@@ -109,13 +109,13 @@ export default function Home() {
                             Exploring the intersection of technology, design, and culture.
                         </p>
                         <div className={styles.ctaRow}>
-                            <button className={styles.buttonPrimary} onClick={() => navigate('/blog')}>Read Blog</button>
+                            <button className={styles.buttonPrimary} onClick={() => navigate('/posts')}>Read Blog</button>
                             <button className={styles.buttonSecondary} onClick={() => navigate('/projects')}>View Projects</button>
                         </div>
                         {/* If there is a featured post, show its title as a highlight link */}
             {latestByDate && (
                             <div style={{ marginTop: '1.25rem', color: '#cbd5e1', fontSize: '.875rem' }}>
-                Latest: <Link to={`/blog/${latestByDate.slug}`} style={{ color: 'wheat', fontWeight: 700 }}>{latestByDate.title}</Link>
+                Latest: <Link to={`/posts/${latestByDate._id}`} style={{ color: 'wheat', fontWeight: 700 }}>{latestByDate.title}</Link>
                             </div>
                         )}
                     </div>
@@ -130,7 +130,7 @@ export default function Home() {
                 {!state.loading && !state.error && (
                     <div className={styles.grid}>
                         {mostLiked && (
-                            <Link to={`/blog/${mostLiked.slug}`} className={styles.tileLink} style={{ gridColumn: '1 / -1' }}>
+                            <Link to={`/posts/${mostLiked._id}`} className={styles.tileLink} style={{ gridColumn: '1 / -1' }}>
                                 <article className={styles.tile} style={{ minHeight: '12rem', position: 'relative' }}>
                                     {/* Most Liked badge on the right */}
                                     <span
@@ -164,7 +164,7 @@ export default function Home() {
                         )}
 
                         {otherRecent.map((p) => (
-                            <Link key={p._id} to={`/blog/${p.slug}`} className={styles.tileLink}>
+                            <Link key={p._id} to={`/posts/${p._id}`} className={styles.tileLink}>
                                 <article className={styles.tile}>
                                     <div>
                                         <div className={styles.tileMeta}>{new Date(p.createdAt).toLocaleDateString()}</div>
@@ -216,7 +216,7 @@ export default function Home() {
                     <div className={styles.projectsGrid}>
                         {/* Left: featured most-liked project */}
                         {featuredProject && (
-                            <a href={featuredProject.demoUrl || featuredProject.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectFeature}>
+                            <Link to={featuredProject._id ? `/projects/${featuredProject._id}` : `/projects/${featuredProject.slug}`} className={styles.projectFeature}>
                                 
                                 <div className={styles.projectFeatureMedia}>
                                     {featuredProject.coverImageUrl ? (
@@ -239,13 +239,13 @@ export default function Home() {
                                         {featuredProject.views ? ` · ${featuredProject.views} views` : ''}
                                     </div>
                                 </div>
-                            </a>
+                            </Link>
                         )}
 
                         {/* Right: remaining top 3 stacked */}
                         <div className={styles.projectList}>
                             {otherTopProjects.map(p => (
-                                <a key={p._id} href={p.demoUrl || p.repoUrl || '#'} target="_blank" rel="noreferrer" className={styles.projectListItem}>
+                                <Link key={p._id} to={p._id ? `/projects/${p._id}` : `/projects/${p.slug}`} className={styles.projectListItem}>
                                     {p.coverImageUrl ? (
                                         <div className={styles.projectThumb}><img src={p.coverImageUrl} alt={p.title} /></div>
                                     ) : (
@@ -260,7 +260,7 @@ export default function Home() {
                                             {p.views ? ` · ${p.views} views` : ''}
                                         </div> */}
                                     </div>
-                                </a>
+                                </Link>
                             ))}
                         </div>
                     </div>

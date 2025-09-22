@@ -1,19 +1,25 @@
 import styles from '../styles/components/PostCard.module.css';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 export default function PostCard({ post }) {
   return (
     <article className={styles.card}>
       <div className={styles.media}>
-        <img src={post.cover} alt={post.title} className={styles.img} />
+  <img src={post.coverImageUrl || post.cover} alt={post.title} className={styles.img} />
         <div className={styles.mediaGradient} />
       </div>
       <div className={styles.content}>
         <div className={styles.metaRow}>
-          <span>{post.readingTime}</span>
-          <span>{new Date(post.date).toLocaleDateString()}</span>
+          {post.readingTime && <span>{post.readingTime}</span>}
+          {post.createdAt && <span>{new Date(post.createdAt).toLocaleDateString()}</span>}
         </div>
         <h2 className={styles.title}>{post.title}</h2>
-        <p className={styles.excerpt}>{post.excerpt}</p>
+        {post.tagline ? (
+          <p className={styles.excerpt}>{post.tagline}</p>
+        ) : (
+          <p className={styles.excerpt}>{post.excerpt}</p>
+        )}
         <div className={styles.tagsRow}>
           {post.tags?.map((tag) => (
             <span key={tag} className={`${styles.tag} ${styles.tagGradient}`}>
@@ -21,10 +27,25 @@ export default function PostCard({ post }) {
             </span>
           ))}
         </div>
-        <a href={`/blog/${post.id}`} className={styles.readMore}>
+  <Link to={post._id ? `/posts/${post._id}` : '#'} className={styles.readMore}>
           Read more →
-        </a>
+        </Link>
       </div>
     </article>
   );
 }
+
+PostCard.propTypes = {
+  post: PropTypes.shape({
+    _id: PropTypes.string,
+    slug: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    coverImageUrl: PropTypes.string,
+    cover: PropTypes.string,
+    readingTime: PropTypes.string,
+    createdAt: PropTypes.string,
+    excerpt: PropTypes.string,
+    tagline: PropTypes.string,
+    tags: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+};

@@ -1,0 +1,109 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  color: #e5e7eb; /* gray-200 */
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: #9ca3af; /* gray-400 */
+  font-size: .9rem;
+}
+.breadcrumbLink {
+  color: #a78bfa; /* violet-400 */
+  text-decoration: none;
+}
+.separator { opacity: .5; }
+
+.header { margin-top: 0.75rem; }
+.title {
+  font-size: clamp(1.8rem, 2.5vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: 800;
+  color: #e9d5ff; /* violet-200 */
+  margin: 0.5rem 0 .25rem;
+}
+.tagline {
+  color: #c4b5fd; /* violet-300 */
+  margin: 0 0 0.75rem;
+}
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  color: #9ca3af;
+  font-size: .9rem;
+}
+.metaLeft span { margin-right: .25rem; }
+.dot { opacity: .6; margin: 0 .25rem; }
+
+.tagsRow { display: flex; flex-wrap: wrap; gap: .4rem; }
+.tag {
+  background: rgba(139, 92, 246, 0.12);
+  color: #ede9fe;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
+}
+
+.coverWrap {
+  margin-top: 1rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.cover {
+  width: 100%;
+  display: block;
+}
+
+.content { margin-top: 1.5rem; }
+
+.comments { margin-top: 2.5rem; }
+.sectionTitle {
+  font-size: 1.25rem;
+  color: #e9d5ff;
+  margin-bottom: .75rem;
+}
+.commentList { list-style: none; padding: 0; margin: 0; }
+.commentItem {
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  border-radius: .75rem;
+  padding: .75rem .9rem;
+  margin-bottom: .75rem;
+}
+.commentHead { display: flex; gap: .5rem; align-items: baseline; color:#d1d5db; }
+.commentDate { color:#9ca3af; font-size: .8rem; }
+.commentBody { margin: .35rem 0 0; color: #e5e7eb; }
+
+.footerBar {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.button,
+.buttonSecondary {
+  text-decoration: none;
+  padding: .55rem .9rem;
+  border-radius: .5rem;
+  font-weight: 600;
+}
+.button { background:#4f46e5; color:#fff; }
+.button:hover { background:#4338ca; }
+.buttonSecondary { background:#111827; color:#e5e7eb; border:1px solid rgba(255,255,255,.08); }
+.buttonSecondary:hover { background:#0b1220; }
+
+.centerBox {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  color: #e5e7eb;
+}
+.error { color: #fca5a5; margin-bottom: .75rem; }

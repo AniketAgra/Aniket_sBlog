@@ -41,8 +41,8 @@ export async function subscribe(req, res, next) {
     const baseUrl = origin || `${req.protocol}://${req.get('host')}`;
     const verifyUrl = `${baseUrl}/api/subscribe/verify?token=${sub.verifyToken}`;
 
-    // Send email (simulated in dev if SMTP not configured)
-    await sendEmail({
+    // Send email (simulated in dev if SMTP not configured or on SMTP auth errors)
+    const emailResult = await sendEmail({
       to: email,
       subject: 'Confirm your subscription',
       html: `<p>Thanks for subscribing!</p>
@@ -51,7 +51,10 @@ export async function subscribe(req, res, next) {
              <p>This link expires in 24 hours.</p>`
     });
 
-    return res.status(201).json({ success: true, message: 'Check your email to confirm your subscription.' });
+    const msg = emailResult?.simulated
+      ? 'Subscription created. Email sending is not configured in this environment. Check server logs for the verification link.'
+      : 'Check your email to confirm your subscription.';
+    return res.status(201).json({ success: true, message: msg });
   } catch (err) {
     // Handle duplicate key race conditions gracefully
     if (err?.code === 11000) {

@@ -9,8 +9,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import adminRoutes from '../api/routes/admin.js';
-import publicPostsRoutes from '../api/routes/publicPosts.js';
-import publicProjectsRoutes from '../api/routes/publicProjects.js';
+import publicPostsRoutes from './routes/posts.routes.js';
+import publicProjectsRoutes from './routes/projects.route.js';
 import uploadRoutes from '../api/routes/upload.route.js';
 import resumeRoutes from '../api/routes/resume.route.js';
 import newsletterRoutes from '../api/routes/newsletter.route.js';
@@ -87,12 +87,19 @@ app.get('/api/subscribe/verify', verifySubscriptionController);
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
+    // Log full error server-side for debugging
+    console.error('[API Error]', {
+        path: req.method + ' ' + req.originalUrl,
+        statusCode,
+        message: err?.message,
+        stack: err?.stack,
+    });
     res.status(statusCode).json({
         success: false,
         error: {
             statusCode,
             message: err.message || 'Internal Server Error',
-            stack: process.env.NODE_ENV === 'development' ? err.stack : null, // Show stack in dev only
+            stack: process.env.NODE_ENV === 'development' ? err.stack : null,
         }
     });
 });

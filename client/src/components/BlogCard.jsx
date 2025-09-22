@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import styles from '../styles/components/BlogCard.module.css';
 
 // Pastel palette inspired by Excalidraw
@@ -48,7 +49,7 @@ export default function BlogCard({ post }) {
   ].map(capitalize);
 
   return (
-    <Link to={`/blog/${post.slug}`} className={styles.cardLink}>
+    <Link to={`/posts/${post._id}` } className={styles.cardLink}>
       <div className={styles.cardContent}>
         {post.coverImageUrl && (
           <div className={styles.imageContainer}>
@@ -96,3 +97,18 @@ export default function BlogCard({ post }) {
     </Link>
   );
 }
+
+BlogCard.propTypes = {
+  post: PropTypes.shape({
+    _id: PropTypes.string,
+    slug: PropTypes.string,
+    title: PropTypes.string.isRequired,
+    createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
+    views: PropTypes.number,
+    tagline: PropTypes.string,
+    content: PropTypes.string,
+    coverImageUrl: PropTypes.string,
+    languages: PropTypes.arrayOf(PropTypes.string),
+    tags: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+};

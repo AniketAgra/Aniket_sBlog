@@ -1,0 +1,37 @@
+.markdown {
+  /* readable line length */
+  max-width: 70ch;
+}
+
+.markdown :where(h1,h2,h3,h4) {
+  color: #f5f3ff;
+  margin: 1.25rem 0 .5rem;
+}
+
+.markdown p { color:#e5e7eb; line-height: 1.7; }
+.markdown a { color:#93c5fd; }
+.markdown a:hover { color:#60a5fa; }
+.markdown code {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  padding: .15rem .35rem;
+  border-radius: .4rem;
+}
+.markdown pre code { border: none; background: transparent; }
+.markdown pre {
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,.08);
+  padding: 1rem;
+  border-radius: .75rem;
+  overflow: auto;
+}
+
+.markdown blockquote {
+  border-left: 3px solid #6366f1;
+  padding-left: .75rem;
+  color:#c7d2fe;
+  margin: 1rem 0;
+}
+
+.markdown ul { padding-left: 1rem; }
+.markdown li { margin: .25rem 0; }

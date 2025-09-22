@@ -2,6 +2,8 @@
 export { default as BlogCard } from './BlogCard';
 export { default as BlogSearchFilter } from './BlogSearchFilter';
 export { default as SignInPrompt } from './SignInPrompt';
+export { default as PostDetail } from './PostDetail';
+export { default as ProjectDetail } from './ProjectDetail';
 
 // Future component exports can go here
 // export { default as Header } from './Header';
