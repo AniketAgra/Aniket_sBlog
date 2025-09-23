@@ -1,0 +1,47 @@
+/* Themed date input tweaks for consistent dark/glass UI */
+.dateInput {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  color-scheme: dark; /* hint widgets to use dark palette */
+  color: #e5e7eb; /* text-gray-200 */
+  background: transparent !important; /* use parent glass bg */
+  border-radius: 0.75rem; /* rounded-xl */
+  background-clip: padding-box;
+  box-shadow: none;
+  height: 2.25rem; /* ~ h-9 for consistent control height */
+}
+
+/* Make calendar icon better visible on dark backgrounds */
+/* Hide native indicator (varies across Chrome/Edge/Win) and draw our own icon in JSX */
+.dateInput::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+}
+
+/* Improve readability of the date parts in Chromium */
+.dateInput::-webkit-datetime-edit-fields-wrapper {
+  color: inherit;
+}
+.dateInput::-webkit-datetime-edit {
+  padding: 0;
+}
+
+/* Remove default white inner background on some Chromium builds */
+.dateInput::-webkit-datetime-edit, 
+.dateInput::-webkit-datetime-edit-year-field,
+.dateInput::-webkit-datetime-edit-month-field,
+.dateInput::-webkit-datetime-edit-day-field,
+.dateInput::-webkit-inner-spin-button,
+.dateInput::-webkit-clear-button {
+  color: inherit;
+  background-color: transparent;
+}
+
+/* Firefox placeholder color */
+.dateInput::placeholder {
+  color: rgb(156 163 175); /* tailwind text-gray-400 */
+}

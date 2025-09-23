@@ -1,0 +1,143 @@
+/* Modular styles for About page only.
+   Tailwind handles most utilities; these classes add polish and reduce JSX clutter. */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+}
+
+.bgWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bgBlobs::before,
+.bgBlobs::after {
+  content: "";
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .15;
+  transform: translate(-20%, -20%);
+}
+
+/* Top-right cool hue */
+.bgBlobs::before {
+  top: -20%;
+  right: -20%;
+  background: radial-gradient(ellipse at center, #60a5fa 0%, transparent 60%);
+}
+
+/* Bottom-left warm hue */
+.bgBlobs::after {
+  bottom: -20%;
+  left: -20%;
+  background: radial-gradient(ellipse at center, var(--color-primary, #8b5cf6) 0%, transparent 60%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+.glass {
+  backdrop-filter: saturate(160%) blur(10px);
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  border-radius: 1rem;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(139,92,246,.25), rgba(59,130,246,.25));
+}
+
+.iconHalo {
+  position: relative;
+}
+.iconHalo::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: radial-gradient(rgba(99,102,241,.35), rgba(99,102,241,0) 70%);
+  filter: blur(2px);
+  z-index: -1;
+}
+
+/* Uniform card used on both sides of the timeline on md+ */
+.timelineCard {
+  min-height: 112px; /* matches md:min-h used previously */
+  max-width: 480px;
+  width: 100%;
+  padding: 1.25rem; /* 5 */
+  border-radius: 0.75rem;
+  /* Neutral margins; spacing controlled per-side on md+ */
+  margin-right: 0;
+  margin-left: 0;
+  /* Vertical centering */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  /* On md+, pull cards slightly inward toward center line */
+  .timelineCardLeft { /* left column */
+    margin-right: 8px;
+  }
+  .timelineCardRight { /* right column */
+    margin-left: 8px;
+  }
+}
+
+.downloadBtn {
+  /* Vibrant gradient button */
+  --btn-start: #8b5cf6; /* violet-500 */
+  --btn-end: #06b6d4;   /* cyan-500 */
+  background: linear-gradient(90deg, var(--btn-start), var(--btn-end));
+  color: #fff;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  border: 0;
+  box-shadow: 0 8px 24px rgba(99,102,241,.35);
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+.downloadBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 34px rgba(99,102,241,.45);
+}
+
+.downloadBtn:active {
+  transform: translateY(0);
+  filter: brightness(.98);
+}
+
+.downloadWrap {
+  margin-top: 3rem; /* clear space from timeline */
+}
+
+/* Dark mode adjustments (works with Tailwind's dark class on html) */
+:global(html.dark) .glass {
+  background: linear-gradient(180deg, rgba(17,24,39,.55), rgba(17,24,39,.35));
+  border-color: rgba(255,255,255,.08);
+}

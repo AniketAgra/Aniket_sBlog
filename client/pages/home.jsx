@@ -132,22 +132,12 @@ export default function Home() {
                         {mostLiked && (
                             <Link to={`/posts/${mostLiked._id}`} className={styles.tileLink} style={{ gridColumn: '1 / -1' }}>
                                 <article className={styles.tile} style={{ minHeight: '12rem', position: 'relative' }}>
-                                    {/* Most Liked badge on the right */}
-                                    <span
-                                        style={{
-                                            position: 'absolute',
-                                            top: 12,
-                                            right: 12,
-                                            background: '#22c55e',
-                                            color: '#0b111f',
-                                            fontWeight: 800,
-                                            fontSize: '.75rem',
-                                            padding: '6px 10px',
-                                            borderRadius: '999px',
-                                            letterSpacing: '.02em',
-                                        }}
-                                    >
-                                        MOST LIKED
+                                    {/* Most Liked badge on the right (gradient pill) */}
+                                    <span className={styles.badgeMostLiked}>
+                                        <svg className={styles.badgeIcon} viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M12 21s-6.5-4.35-9.33-7.18A5.5 5.5 0 1 1 11.07 6l.93.94.93-.94a5.5 5.5 0 1 1 8.4 7.82C18.5 16.65 12 21 12 21z" fill="currentColor" stroke="none"></path>
+                                        </svg>
+                                        Most Liked
                                     </span>
                                     <div>
                                         <div className={styles.tileMeta}>{new Date(mostLiked.createdAt).toLocaleDateString()}</div>
@@ -228,7 +218,12 @@ export default function Home() {
                                 
                                 <div className={styles.projectFeatureBody}>
                                     {/* Persistent Most Liked badge */}
-                                    <span className={styles.badgeMostLiked}>MOST LIKED</span>
+                                    <span className={styles.badgeMostLiked}>
+                                        <svg className={styles.badgeIcon} viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M12 21s-6.5-4.35-9.33-7.18A5.5 5.5 0 1 1 11.07 6l.93.94.93-.94a5.5 5.5 0 1 1 8.4 7.82C18.5 16.65 12 21 12 21z" fill="currentColor" stroke="none"></path>
+                                        </svg>
+                                        Most Liked
+                                    </span>
                                     <div className={styles.tileMeta1}>
                                         {new Date(featuredProject.createdAt).toLocaleDateString()}
                                     </div>

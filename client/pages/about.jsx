@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSelector } from 'react-redux';
 import { SignInPrompt } from "../src/components";
+import styles from './about.module.css';
+import { MdWork, MdSchool, MdCode, MdFileDownload } from 'react-icons/md';
 
 export default function About() {
   const { currentUser } = useSelector(s => s.user);
@@ -17,31 +19,36 @@ export default function About() {
     };
   }, []);
 
-  return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200 min-h-screen relative">
-      {/* Background gradients */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute bottom-0 left-0 h-1/2 w-full bg-gradient-to-t from-primary/20 to-transparent"></div>
-        <div className="absolute top-0 right-0 h-1/2 w-full bg-gradient-to-b from-blue-500/10 to-transparent"></div>
-      </div>
+  // Timeline items memoized for stability
+  const timelineItems = useMemo(() => ([
+    { role: "Software Engineer at Innovatech Solutions", period: "2020 - Present", Icon: MdWork },
+    { role: "Master's in Computer Science", period: "2018 - 2020", Icon: MdSchool },
+    { role: "Bachelor's in Computer Science", period: "2014 - 2018", Icon: MdSchool },
+    { role: "Freelance Web Developer", period: "2016 - 2018", Icon: MdCode },
+  ]), []);
 
-      <div className="relative z-10 flex flex-col">
+  return (
+    <div className={`bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200 ${styles.page}`}>
+      {/* Background gradients handled with CSS module */}
+      <div className={`${styles.bgWrap} ${styles.bgBlobs}`} />
+
+      <div className={`flex flex-col ${styles.content}`}>
 
         {/* Main Content */}
         <main className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 space-y-12 md:space-y-16">
           {/* Intro */}
           <section className="flex flex-col items-center text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
               About Me
             </h1>
-            <p className="mt-3 md:mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+            <p className="mt-3 md:mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400 mb-8">
               A passionate software engineer with a focus on creating innovative
               solutions and a love for continuous learning.
             </p>
           </section>
 
           {/* Profile Card */}
-          <section className="rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl glassmorphism">
+          <section className={`p-6 md:p-8 ${styles.glass}`}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               <div className="flex justify-center md:justify-start">
                 <img
@@ -50,7 +57,7 @@ export default function About() {
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuACdb-iBJkuD5HtIq21pwdTcn449CSStmlz9JzGfhud-ptEfs7FzLhKgva3tJ2RnQC0SPiSqVi1n6XwB8K8jqiWqA7u-iaPv8KIWkz_bkHFBQTER0v-L3V5n7hUkiqDgxcAMIeBlFQz4uxrlMq58gdhkoaipaHD6LF7zz2OVHdSzgUHrt-TZ2EotaZu-_yGtqu4OO9f2OH42AbtDAUEBT-P5Xppwhbt4jvGRkZSXhw0HMGDYGYbOq7bvtr0kLNuUSmV0Kn2HDP8yps"
                 />
               </div>
-              <div className="col-span-2 space-y-3 md:space-y-4 text-center md:text-left">
+              <div className="col-span-2 space-y-3 md:space-y-4 text-left md:text-left">
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                     Sophia Carter
@@ -77,40 +84,19 @@ export default function About() {
 
           {/* Timeline */}
           <section>
-            <h2 className="mb-6 md:mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="mt-7 mb-6 md:mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
               My Journey
             </h2>
-            <div className="relative">
-              <div className="absolute left-1/2 h-full w-0.5 -translate-x-1/2 bg-primary/20"></div>
+            <div className={`relative ${styles.timeline}`}>
+              <div className={styles.timelineLine}></div>
 
               <div className="space-y-10 md:space-y-14">
-              {[
-                {
-                  role: "Software Engineer at Innovatech Solutions",
-                  period: "2020 - Present",
-                  icon: "work",
-                },
-                {
-                  role: "Master's in Computer Science",
-                  period: "2018 - 2020",
-                  icon: "school",
-                },
-                {
-                  role: "Bachelor's in Computer Science",
-                  period: "2014 - 2018",
-                  icon: "school",
-                },
-                {
-                  role: "Freelance Web Developer",
-                  period: "2016 - 2018",
-                  icon: "code",
-                },
-              ].map((item, idx) => (
-                <div key={idx} className="relative flex items-center min-h-[96px] md:min-h-[112px]">
+              {timelineItems.map((item, idx) => (
+                <div key={idx} className="relative flex items-center min-h-[96px] mb-7 md:min-h-[112px]">
                   {/* Left side for md+ */}
                   {idx % 2 === 0 ? (
-                    <div className="hidden md:flex w-1/2 justify-end pr-8 text-right">
-                      <div>
+                    <div className="hidden md:flex w-1/2 justify-end pr-2 lg:pr-4 text-right">
+                        <div className={`border border-white/10 shadow-lg ${styles.glass} ${styles.timelineCard} ${styles.timelineCardLeft}`}>
                         <p className="font-semibold text-gray-900 dark:text-white">
                           {item.role}
                         </p>
@@ -120,8 +106,8 @@ export default function About() {
                       </div>
                     </div>
                   ) : (
-                    <div className="w-full pr-6 text-right md:w-1/2 md:pr-8">
-                      <div className="rounded-lg border border-white/10 p-5 shadow-lg glassmorphism md:hidden">
+                    <div className="w-1/2 mr-10 pr-6 text-right md:w-1/2 md:pr-8">
+                      <div className={`rounded-lg border border-white/10 p-5 shadow-lg md:hidden ${styles.glass}`}>
                         <p className="font-semibold text-gray-900 dark:text-white">
                           {item.role}
                         </p>
@@ -134,19 +120,17 @@ export default function About() {
 
                   {/* Icon */}
                   <div className="absolute left-1/2 -translate-x-1/2">
-                    <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-background-light dark:bg-background-dark">
+                    <div className={`z-10 flex h-12 w-12 items-center justify-center rounded-full bg-background-light dark:bg-background-dark ${styles.iconHalo}`}>
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white">
-                        <span className="material-symbols-outlined">
-                          {item.icon}
-                        </span>
+                        <item.Icon size={20} />
                       </div>
                     </div>
                   </div>
 
                   {/* Right side for md+ */}
                   {idx % 2 === 0 ? (
-                    <div className="w-full pl-6 md:w-1/2 md:pl-8">
-                      <div className="rounded-lg border border-white/10 p-5 shadow-lg glassmorphism md:hidden">
+                    <div className="w-1/2 ml-10 pl-6 md:w-1/2 md:pl-2 lg:pl-4">
+                      <div className={`rounded-lg border border-white/10 p-5 shadow-lg md:hidden ${styles.glass}`}>
                         <p className="font-semibold text-gray-900 dark:text-white">
                           {item.role}
                         </p>
@@ -156,8 +140,8 @@ export default function About() {
                       </div>
                     </div>
                   ) : (
-                    <div className="hidden w-1/2 pl-8 md:flex">
-                      <div>
+                    <div className="hidden w-1/2 pl-2 lg:pl-4 md:flex">
+                        <div className={`border border-white/10 shadow-lg ${styles.glass} ${styles.timelineCard} ${styles.timelineCardRight}`}>
                         <p className="font-semibold text-gray-900 dark:text-white">
                           {item.role}
                         </p>
@@ -174,7 +158,7 @@ export default function About() {
           </section>
 
           {/* Download Resume */}
-          <section className="text-center">
+          <section className={`text-center ${styles.downloadWrap}`}>
             <button
               onClick={async () => {
                 if (!currentUser) {
@@ -212,9 +196,10 @@ export default function About() {
                 }
               }}
               disabled={downloading}
-              className="inline-flex min-w-[84px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark disabled:opacity-60"
+              className={`inline-flex min-w-[84px] cursor-pointer items-center justify-center gap-2 rounded-lg px-7 py-3.5 text-base font-bold shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2 dark:focus:ring-offset-background-dark disabled:opacity-60 ${styles.downloadBtn}`}
             >
-              <span className="truncate">{downloading ? 'Downloading...' : 'Download Resume'}</span>
+              <MdFileDownload size={18} />
+              <span className="truncate">{downloading ? 'Downloading…' : 'Download Resume'}</span>
             </button>
             {showSignInPrompt && !currentUser && (
               <div className="mt-4">

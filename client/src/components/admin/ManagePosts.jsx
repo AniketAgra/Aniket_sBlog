@@ -3,6 +3,7 @@ import SectionHeader from './SectionHeader';
 import GlassCard from './GlassCard';
 import ConfirmModal from '../ConfirmModal';
 import { AiOutlineSearch } from 'react-icons/ai';
+import SelectMenu from '../SelectMenu';
 import { HiOutlineEye, HiOutlinePencil, HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi';
 
 export default function ManagePosts() {
@@ -65,15 +66,16 @@ export default function ManagePosts() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <select
-            className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
+          <SelectMenu
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'published', label: 'Published' },
+              { value: 'draft', label: 'Drafts' },
+            ]}
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="published">Published</option>
-            <option value="draft">Drafts</option>
-          </select>
+            onChange={setStatusFilter}
+            srLabel="Filter posts by status"
+          />
           <div className="text-xs text-gray-400">{filtered.length} of {data.total} posts</div>
         </div>
       </div>

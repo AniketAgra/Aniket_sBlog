@@ -1,95 +1,99 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import SignInPrompt from '../src/components/SignInPrompt';
+import { Pagination, ProjectCard, ProjectsFilterBar } from '../src/components';
+import useProjectsQuery from '../src/hooks/useProjectsQuery';
 
 export default function Projects() {
-  const [state, setState] = useState({ items: [], loading: true, error: null });
-  const [showAll, setShowAll] = useState(false); // initially show only 3
-  const [showPrompt, setShowPrompt] = useState(false);
-  const currentUser = useSelector(s => s.user?.currentUser);
+  const currentUser = useSelector((s) => s.user?.currentUser);
+  const {
+    items,
+    loading,
+    error,
+    page,
+    totalPages,
+    facets,
+    query,
+    setPage,
+    setSort,
+    setQ,
+    setView,
+    toggleFilter,
+    clearFilters,
+  } = useProjectsQuery({ limit: 9, sort: 'newest', order: 'desc', view: 'grid' });
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/projects');
-        const data = await res.json();
-        if(!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to load projects');
-        setState({ items: data.items || [], loading: false, error: null });
-      } catch (e) {
-        setState({ items: [], loading: false, error: e.message });
-      }
-    };
-    load();
-  }, []);
-
+  // Client-side fallback search (mirrors posts page behavior)
   const visibleItems = useMemo(() => {
-    if (currentUser || showAll) return state.items;
-    return state.items.slice(0, 3);
-  }, [state.items, currentUser, showAll]);
+    const qText = String(query.q || '').trim().toLowerCase();
+    if (!qText) return items;
+    const tokens = Array.from(new Set(qText.split(/\s+/).filter(Boolean)));
+    if (!tokens.length) return items;
+    return items.filter((p) => {
+      const haystack = [
+        String(p.title || ''),
+        String(p.tagline || ''),
+        ...(Array.isArray(p.tags) ? p.tags : []).map(String),
+        ...(Array.isArray(p.languages) ? p.languages : []).map(String),
+        ...(Array.isArray(p.keywords) ? p.keywords : []).map(String),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return tokens.every((t) => haystack.includes(t));
+    });
+  }, [items, query.q]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <header className="mb-6 sm:mb-8">
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Projects</h1>
-        <p className="mt-2 text-sm text-gray-400 max-w-2xl">Things I’ve built, experimented with, and shipped.</p>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <header className="mb-6 text-center sm:mb-8">
+        <h1 className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-cyan-400 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+          My Projects
+        </h1>
+        <p className="mx-auto mt-2 max-w-3xl text-sm text-gray-300">
+          Explore a selection of my recent projects, showcasing my skills and experience in web and mobile development.
+        </p>
       </header>
-      {state.loading && <div className="text-gray-400">Loading…</div>}
-      {state.error && <div className="text-red-400">{state.error}</div>}
-      <div className="grid gap-5 sm:gap-6 md:gap-7 sm:grid-cols-2 lg:grid-cols-3">
-        {visibleItems.map(p => (
-          <article key={p._id} className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10">
-            <Link to={p._id ? `/projects/${p._id}` : `/projects/${p.slug}`} className="block">
-              {p.coverImageUrl && <img src={p.coverImageUrl} alt={p.title} className="h-44 sm:h-48 w-full object-cover"/>}
-              <div className="px-4 sm:px-5 py-4">
-                <div className="text-[11px] text-gray-400">{new Date(p.createdAt).toLocaleDateString()}</div>
-                <h2 className="mt-1.5 text-[1.05rem] sm:text-lg font-bold leading-snug">{p.title}</h2>
-                {p.tagline && <p className="text-sm text-gray-300 mt-1.5">{p.tagline}</p>}
-              </div>
-            </Link>
-            <div className="px-4 sm:px-5 pb-4 -mt-2 flex items-center gap-3 text-sm">
-              {p.demoUrl && <a href={p.demoUrl} target="_blank" rel="noreferrer" className="text-cyan-300 hover:underline">Demo</a>}
-              {p.repoUrl && <a href={p.repoUrl} target="_blank" rel="noreferrer" className="text-cyan-300 hover:underline">Repo</a>}
-            </div>
-          </article>
-        ))}
-      </div>
 
-      {/* Show more button: appears when there are more than 3 items and not yet expanded */}
-      {state.items.length > 3 && !showAll && !state.loading && !state.error && !currentUser &&(
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              if (currentUser) setShowAll(true);
-              else setShowPrompt(true);
-            }}
-            style={{
-              background: '#111827',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
-          >
-            Show more
-          </button>
-        </div>
+      <ProjectsFilterBar
+        q={query.q}
+        onQ={setQ}
+        sort={query.sort}
+        onSort={setSort}
+        view={query.view}
+        onView={setView}
+        facets={facets}
+        activeTags={query.tags || []}
+        activeLanguages={query.languages || []}
+        onToggleTag={(v) => toggleFilter('tags', v)}
+        onToggleLanguage={(v) => toggleFilter('languages', v)}
+        onClear={clearFilters}
+      />
+
+      {loading && <div className="text-gray-400">Loading…</div>}
+      {error && <div className="text-red-400">{error}</div>}
+
+  {!loading && !error && visibleItems.length === 0 && (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center text-gray-300">No projects found.</div>
       )}
 
-      {/* Inline sign-in prompt when trying to expand while logged out */}
-      {showPrompt && !currentUser && (
-        <div className="mt-6 flex justify-center">
-          <div className="w-full max-w-2xl">
-            <SignInPrompt
-              message="Create a free account or sign in to view all projects."
-              onClose={() => setShowPrompt(false)}
-            />
+  {visibleItems.length > 0 && (
+        query.view === 'list' ? (
+          <div className="flex flex-col gap-3">
+    {visibleItems.map((p) => (<ProjectCard key={p._id || p.slug} project={p} variant="list" />))}
           </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+    {visibleItems.map((p) => (<ProjectCard key={p._id || p.slug} project={p} variant="grid" />))}
+          </div>
+        )
+      )}
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+
+      {!currentUser && (
+        <div className="mt-10">
+          <SignInPrompt message="Create a free account or sign in to like and comment on projects." />
         </div>
       )}
     </div>
-  )
+  );
 }

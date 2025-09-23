@@ -146,18 +146,105 @@ export const listPosts = async (req, res, next) => {
 
 export const listProjects = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, language, tag } = req.query;
-  const filter = {};
-  // Hide drafts for public lists, but include legacy docs without status
-  filter.$or = [{ status: 'published' }, { status: { $exists: false } }];
-    if (language) filter.languages = language;
-    if (tag) filter.tags = tag;
-    const docs = await Project.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((+page - 1) * +limit)
-      .limit(+limit);
-    const count = await Project.countDocuments(filter);
-    res.json({ items: docs, page: +page, total: count });
+    const { page = 1, limit = 10 } = req.query;
+    // Backward-compatible single filters
+    const singleLanguage = req.query.language;
+    const singleTag = req.query.tag;
+    // Optional multi-value filters (comma separated)
+    const languagesParam = req.query.languages;
+    const tagsParam = req.query.tags;
+    const q = (req.query.q || '').toString().trim();
+    const includeFacets = ['1', 'true', 'yes'].includes(String(req.query.includeFacets || '').toLowerCase());
+
+    const filter = {};
+    // Hide drafts for public lists, but include legacy docs without status
+    filter.$or = [{ status: 'published' }, { status: { $exists: false } }];
+
+    const languages = Array.isArray(languagesParam)
+      ? languagesParam
+      : typeof languagesParam === 'string' && languagesParam
+      ? languagesParam.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    const tags = Array.isArray(tagsParam)
+      ? tagsParam
+      : typeof tagsParam === 'string' && tagsParam
+      ? tagsParam.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    if (singleLanguage) languages.push(singleLanguage);
+    if (singleTag) tags.push(singleTag);
+
+    if (languages.length) filter.languages = { $in: languages };
+    if (tags.length) filter.tags = { $in: tags };
+
+    if (q) {
+      // Multi-token AND search across title, tagline, tags, languages, and keywords
+      const tokens = Array.from(new Set(q.split(/\s+/).filter(Boolean)));
+      if (tokens.length) {
+        filter.$and = tokens.map((t) => {
+          const rx = new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          return { $or: [
+            { title: rx },
+            { tagline: rx },
+            { tags: rx },
+            { languages: rx },
+            { keywords: rx },
+          ] };
+        });
+      }
+    }
+
+    // Sorting support
+    const sortParam = (req.query.sort || '').toString();
+    const orderParam = (req.query.order || '').toString().toLowerCase();
+    /** @type {Record<string, 1|-1>} */
+    let sort = { createdAt: -1 };
+    const dir = orderParam === 'asc' ? 1 : -1;
+    switch (sortParam) {
+      case 'likes':
+        sort = { likes: dir, createdAt: -1 };
+        break;
+      case 'views':
+        sort = { views: dir, createdAt: -1 };
+        break;
+      case 'title':
+        sort = { title: dir };
+        break;
+      case 'oldest':
+        sort = { createdAt: 1 };
+        break;
+      case 'newest':
+      default:
+        sort = { createdAt: -1 };
+    }
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [docs, count, facets] = await Promise.all([
+      Project.find(filter).sort(sort).skip(skip).limit(limitNum),
+      Project.countDocuments(filter),
+      includeFacets
+        ? Project.aggregate([
+            { $match: filter },
+            { $project: { tags: 1, languages: 1 } },
+            { $facet: {
+              tags: [ { $unwind: { path: '$tags', preserveNullAndEmptyArrays: false } }, { $group: { _id: { $toLower: '$tags' }, label: { $first: '$tags' }, count: { $sum: 1 } } }, { $sort: { count: -1 } } ],
+              languages: [ { $unwind: { path: '$languages', preserveNullAndEmptyArrays: false } }, { $group: { _id: { $toLower: '$languages' }, label: { $first: '$languages' }, count: { $sum: 1 } } }, { $sort: { count: -1 } } ],
+            } },
+          ])
+        : Promise.resolve([]),
+    ]);
+
+    const result = { items: docs, page: pageNum, total: count, pageSize: limitNum, hasMore: skip + docs.length < count };
+    if (includeFacets && Array.isArray(facets) && facets[0]) {
+      result.facets = {
+        tags: facets[0].tags?.map((t) => ({ value: t.label, count: t.count })) || [],
+        languages: facets[0].languages?.map((t) => ({ value: t.label, count: t.count })) || [],
+      };
+    }
+    res.json(result);
   } catch (e) { next(e); }
 };
 

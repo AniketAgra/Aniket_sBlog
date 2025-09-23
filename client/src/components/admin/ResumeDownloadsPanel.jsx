@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { HiOutlineCloudArrowDown, HiOutlineCalendar, HiOutlineUserGroup, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 import GlassCard from './GlassCard';
 import StatCard from './StatCard';
+import DateInput from './DateInput';
 
 function SkeletonRow() {
   return (
@@ -72,21 +73,31 @@ export default function ResumeDownloadsPanel() {
 
   return (
     <div className="mt-10">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Resume Downloads</h3>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        {/* <h2 className="text-lg font-semibold text-white">Resume Downloads Data</h2> */}
         {/* search & filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
+        <div className="flex items-center gap-2 flex-1 min-w-[220px]">
+          <div className="relative w-full">
             <HiOutlineMagnifyingGlass className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               value={q}
               onChange={(e) => { setPage(1); setQ(e.target.value); }}
-              placeholder="Search user, email, IP…"
-              className="w-52 rounded-lg border border-white/10 bg-white/5 py-2 pl-8 pr-3 text-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-fuchsia-500/40"
+              placeholder="Search Username, Email, User agent, IP…"
+              className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-8 pr-3 text-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-fuchsia-500/40"
             />
           </div>
-          <input type="date" value={dateFrom} onChange={(e) => { setPage(1); setDateFrom(e.target.value); }} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/40" />
-          <input type="date" value={dateTo} onChange={(e) => { setPage(1); setDateTo(e.target.value); }} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/40" />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <DateInput
+            value={dateFrom}
+            onChange={(e) => { setPage(1); setDateFrom(e.target.value); }}
+            placeholder="From"
+          />
+          <DateInput
+            value={dateTo}
+            onChange={(e) => { setPage(1); setDateTo(e.target.value); }}
+            placeholder="To"
+          />
         </div>
       </div>
 
