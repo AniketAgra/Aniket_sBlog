@@ -1,0 +1,8 @@
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index: 50; }
+.modal { width: min(92vw, 460px); background: rgba(17, 24, 39, .96); border:1px solid rgba(255,255,255,.08); border-radius: .9rem; padding: 1rem 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.title { color:#e9d5ff; font-size:1.05rem; margin:0 0 .35rem; }
+.message { color:#d1d5db; margin:.25rem 0 .75rem; }
+.actions { display:flex; gap:.5rem; justify-content:flex-end; }
+.cancel { background: transparent; border:1px solid rgba(255,255,255,.15); color:#9ca3af; padding:.45rem .8rem; border-radius:.45rem; cursor:pointer; }
+.confirm { background: linear-gradient(135deg, #7c3aed, #f472b6); border:none; color:white; padding:.45rem .9rem; border-radius:.5rem; cursor:pointer; }
+.cancel[disabled], .confirm[disabled] { opacity:.7; cursor:not-allowed; }

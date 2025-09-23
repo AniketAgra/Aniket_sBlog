@@ -1,6 +1,7 @@
 .markdown {
-  /* readable line length */
-  max-width: 70ch;
+  /* Use full available width inside the container */
+  width: 100%;
+  max-width: none;
 }
 
 .markdown :where(h1,h2,h3,h4) {
@@ -35,3 +36,9 @@
 
 .markdown ul { padding-left: 1rem; }
 .markdown li { margin: .25rem 0; }
+
+/* Make media scale to container width */
+.markdown img, .markdown video, .markdown iframe {
+  max-width: 100%;
+  height: auto;
+}

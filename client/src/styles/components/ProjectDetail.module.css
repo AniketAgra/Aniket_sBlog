@@ -1,0 +1,26 @@
+/* ProjectDetail.module.css
+ * Project-only accents layered on top of the base PostDetail.module.css.
+ * The component merges base + project classes so these act as overrides.
+ */
+
+/* Indigo accent for tags to visually distinguish projects */
+.tag {
+  background-color: rgba(99, 102, 241, 0.12);
+  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+/* Slight glow to make project titles stand out */
+.title { text-shadow: 0 1px 0 rgba(0,0,0,0.25); }
+
+/* Softer radius and a subtle outline for project images */
+.cover {
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25), 0 0 0 1px rgba(99,102,241,0.15);
+}
+
+/* Slight indigo tint on hover for consistency */
+.iconButton:hover { color: #a5b4fc; }
+
+/* Red when liked (merged with base). */
+.heartActive { color: #ef4444; }

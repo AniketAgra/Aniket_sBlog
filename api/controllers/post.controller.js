@@ -11,6 +11,42 @@ import {
   commentCreateSchema,
 } from '../utils/validation.js';
 
+// Admin: List Posts (optionally only mine)
+export const listAdminPosts = async (req, res, next) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '10', 10)));
+    const skip = (page - 1) * limit;
+    const mine = ['1', 'true', 'yes'].includes(String(req.query.mine || '').toLowerCase());
+  const status = req.query.status;
+  const filter = mine ? { author: req.user.id } : {};
+  if (status === 'draft' || status === 'published') filter.status = status;
+    const [items, total] = await Promise.all([
+      Post.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Post.countDocuments(filter),
+    ]);
+    res.json({ items, page, total });
+  } catch (e) { next(e); }
+};
+
+// Admin: List Projects (optionally only mine)
+export const listAdminProjects = async (req, res, next) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '10', 10)));
+    const skip = (page - 1) * limit;
+    const mine = ['1', 'true', 'yes'].includes(String(req.query.mine || '').toLowerCase());
+    const status = req.query.status;
+    const filter = mine ? { author: req.user.id } : {};
+    if (status === 'draft' || status === 'published') filter.status = status;
+    const [items, total] = await Promise.all([
+      Project.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Project.countDocuments(filter),
+    ]);
+    res.json({ items, page, total });
+  } catch (e) { next(e); }
+};
+
 // Admin: Create Post
 export const createPost = async (req, res, next) => {
   try {
@@ -94,7 +130,9 @@ export const getAnalytics = async (req, res, next) => {
 export const listPosts = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, language, tag } = req.query;
-    const filter = {};
+  const filter = {};
+  // Hide drafts for public lists, but include legacy docs without status
+  filter.$or = [{ status: 'published' }, { status: { $exists: false } }];
     if (language) filter.languages = language;
     if (tag) filter.tags = tag;
     const docs = await Post.find(filter)
@@ -109,7 +147,9 @@ export const listPosts = async (req, res, next) => {
 export const listProjects = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, language, tag } = req.query;
-    const filter = {};
+  const filter = {};
+  // Hide drafts for public lists, but include legacy docs without status
+  filter.$or = [{ status: 'published' }, { status: { $exists: false } }];
     if (language) filter.languages = language;
     if (tag) filter.tags = tag;
     const docs = await Project.find(filter)
@@ -126,17 +166,42 @@ export const getPost = async (req, res, next) => {
   try {
   const { id } = req.params;
   const isObjectId = !!(id && Types.ObjectId.isValid(id));
-    const query = isObjectId ? { _id: id } : { slug: id };
+    const canSeeDrafts = req.user?.role === 'admin';
+    const statusClause = canSeeDrafts ? {} : { $or: [{ status: 'published' }, { status: { $exists: false } }] };
+    const query = isObjectId ? { _id: id, ...statusClause } : { slug: id, ...statusClause };
     // Ensure we don't try to $inc on null by using findOneAndUpdate; if not found as slug, also try by _id as fallback
-  let post = await Post.findOneAndUpdate(query, { $inc: { views: 1 } }, { new: true });
-  console.log(post);
+    let post = await Post.findOneAndUpdate(query, { $inc: { views: 1 } }, { new: true })
+      .populate('author', 'username name profilePicture');
+    console.log(post);
     if (!post && !isObjectId) {
       // Fallback: if slug lookup failed, attempt ObjectId lookup in case slug resembles an id
-      post = await Post.findOneAndUpdate({ _id: id }, { $inc: { views: 1 } }, { new: true }).catch(() => null);
+      post = await Post.findOneAndUpdate({ _id: id, ...statusClause }, { $inc: { views: 1 } }, { new: true })
+        .populate('author', 'username name profilePicture')
+        .catch(() => null);
     }
     if (!post) return next(errorHandler(404, 'Post not found'));
-    const comments = await Comment.find({ targetType: 'post', targetId: post._id }).sort({ createdAt: -1 });
-    res.json({ ...post.toObject(), comments });
+    const commentsDocs = await Comment.find({ targetType: 'post', targetId: post._id, parentId: null }).sort({ createdAt: -1 });
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const comments = commentsDocs.map((c) => ({
+      ...c.toObject(),
+      liked: !!(
+        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
+        (ip && c.likedByIps?.includes(String(ip)))
+      ),
+    }));
+    const obj = post.toObject({ virtuals: true });
+    const author = post.author && typeof post.author === 'object' ? {
+      id: post.author._id,
+      name: post.author.name || post.author.username,
+      username: post.author.username,
+      profilePicture: post.author.profilePicture,
+    } : undefined;
+    const liked = !!(
+      (userId && post.likedByUserIds?.some((u) => String(u) === userId)) ||
+      (ip && post.likedByIps?.includes(String(ip)))
+    );
+    res.json({ ...obj, author, authorName: author?.name, comments, liked });
   } catch (e) { next(e); }
 };
 
@@ -152,15 +217,28 @@ export const likePost = async (req, res, next) => {
 
     const alreadyByUser = userId && post.likedByUserIds.some(u => u.toString() === userId);
     const alreadyByIp = post.likedByIps.includes(String(ip));
-    if (alreadyByUser || alreadyByIp) return res.json({ likes: post.likes });
+    if (alreadyByUser || alreadyByIp) {
+      // Toggle off (unlike)
+      const update = {
+        $inc: { likes: -1 },
+        $pull: {
+          ...(userId ? { likedByUserIds: userId } : {}),
+          likedByIps: String(ip),
+        },
+      };
+      const updated = await Post.findByIdAndUpdate(id, update, { new: true });
+      const likes = Math.max(0, updated.likes || 0);
+      if (updated.likes !== likes) {
+        await Post.findByIdAndUpdate(id, { $set: { likes } });
+      }
+      return res.json({ likes, liked: false });
+    }
 
-    const update = {
-      $inc: { likes: 1 },
-      ...(userId ? { $addToSet: { likedByUserIds: userId } } : {}),
-      $addToSet: { likedByIps: String(ip) },
-    };
+    // Like
+    const update = { $inc: { likes: 1 }, $addToSet: { likedByIps: String(ip) } };
+    if (userId) update.$addToSet.likedByUserIds = userId;
     const updated = await Post.findByIdAndUpdate(id, update, { new: true });
-    res.json({ likes: updated.likes });
+    res.json({ likes: updated.likes, liked: true });
   } catch (e) { next(e); }
 };
 
@@ -192,29 +270,79 @@ export const getPostComments = async (req, res, next) => {
     const { page = 1, limit = 20 } = req.query;
     const post = await Post.findById(id);
     if (!post) return next(errorHandler(404, 'Post not found'));
-    const comments = await Comment.find({ targetType: 'post', targetId: post._id })
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const docs = await Comment.find({ targetType: 'post', targetId: post._id, parentId: null })
       .sort({ createdAt: -1 })
       .skip((+page - 1) * +limit)
       .limit(+limit);
-    const total = await Comment.countDocuments({ targetType: 'post', targetId: post._id });
-    res.json({ items: comments, page: +page, total });
+    const total = await Comment.countDocuments({ targetType: 'post', targetId: post._id, parentId: null });
+    const items = docs.map((c) => ({
+      ...c.toObject(),
+      liked: !!(
+        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
+        (ip && c.likedByIps?.includes(String(ip)))
+      ),
+    }));
+    res.json({ items, page: +page, total });
   } catch (e) { next(e); }
 };
 
 // Public: Get Project by id (include demoUrl)
 export const getProject = async (req, res, next) => {
   try {
-  const { id } = req.params;
-  const isObjectId = !!(id && Types.ObjectId.isValid(id));
-    const query = isObjectId ? { _id: id } : { slug: id };
+    const { id } = req.params;
+    const isObjectId = !!(id && Types.ObjectId.isValid(id));
+    const canSeeDrafts = req.user?.role === 'admin';
+    const statusClause = canSeeDrafts ? {} : { $or: [{ status: 'published' }, { status: { $exists: false } }] };
+    const query = isObjectId ? { _id: id, ...statusClause } : { slug: id, ...statusClause };
+
     let project = await Project.findOneAndUpdate(query, { $inc: { views: 1 } }, { new: true });
-    console.log(project);
     if (!project && !isObjectId) {
-      project = await Project.findOneAndUpdate({ _id: id }, { $inc: { views: 1 } }, { new: true }).catch(() => null);
+      // Fallback to ObjectId lookup if slug-like id was provided
+      project = await Project.findOneAndUpdate({ _id: id, ...statusClause }, { $inc: { views: 1 } }, { new: true }).catch(() => null);
     }
     if (!project) return next(errorHandler(404, 'Project not found'));
-    const comments = await Comment.find({ targetType: 'project', targetId: project._id }).sort({ createdAt: -1 });
-    res.json({ ...project.toObject(), comments });
+
+    const commentsDocs = await Comment.find({ targetType: 'project', targetId: project._id, parentId: null }).sort({ createdAt: -1 });
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const comments = commentsDocs.map((c) => ({
+      ...c.toObject(),
+      liked: !!(
+        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
+        (ip && c.likedByIps?.includes(String(ip)))
+      ),
+    }));
+    const liked = !!(
+      (userId && project.likedByUserIds?.some((u) => String(u) === userId)) ||
+      (ip && project.likedByIps?.includes(String(ip)))
+    );
+    res.json({ ...project.toObject(), comments, liked });
+  } catch (e) { next(e); }
+};
+
+// Public: Lightweight counters for Post (no view increment)
+export const getPostCounters = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const isObjectId = !!(id && Types.ObjectId.isValid(id));
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const post = await Post.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1 });
+    if (!post) return next(errorHandler(404, 'Post not found'));
+    res.json({ likes: post.likes || 0, commentsCount: post.commentsCount || 0, updatedAt: post.updatedAt });
+  } catch (e) { next(e); }
+};
+
+// Public: Lightweight counters for Project (no view increment)
+export const getProjectCounters = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const isObjectId = !!(id && Types.ObjectId.isValid(id));
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const project = await Project.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1 });
+    if (!project) return next(errorHandler(404, 'Project not found'));
+    res.json({ likes: project.likes || 0, commentsCount: project.commentsCount || 0, updatedAt: project.updatedAt });
   } catch (e) { next(e); }
 };
 
@@ -227,14 +355,27 @@ export const likeProject = async (req, res, next) => {
     if (!project) return next(errorHandler(404, 'Project not found'));
     const alreadyByUser = userId && project.likedByUserIds.some(u => u.toString() === userId);
     const alreadyByIp = project.likedByIps.includes(String(ip));
-    if (alreadyByUser || alreadyByIp) return res.json({ likes: project.likes });
-    const update = {
-      $inc: { likes: 1 },
-      ...(userId ? { $addToSet: { likedByUserIds: userId } } : {}),
-      $addToSet: { likedByIps: String(ip) },
-    };
+    if (alreadyByUser || alreadyByIp) {
+      // Unlike
+      const update = {
+        $inc: { likes: -1 },
+        $pull: {
+          ...(userId ? { likedByUserIds: userId } : {}),
+          likedByIps: String(ip),
+        },
+      };
+      const updated = await Project.findByIdAndUpdate(id, update, { new: true });
+      const likes = Math.max(0, updated.likes || 0);
+      if (updated.likes !== likes) {
+        await Project.findByIdAndUpdate(id, { $set: { likes } });
+      }
+      return res.json({ likes, liked: false });
+    }
+
+    const update = { $inc: { likes: 1 }, $addToSet: { likedByIps: String(ip) } };
+    if (userId) update.$addToSet.likedByUserIds = userId;
     const updated = await Project.findByIdAndUpdate(id, update, { new: true });
-    res.json({ likes: updated.likes });
+    res.json({ likes: updated.likes, liked: true });
   } catch (e) { next(e); }
 };
 
@@ -258,18 +399,70 @@ export const commentOnProject = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+// Public: Get project comments with pagination
+export const getProjectComments = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const project = await Project.findById(id);
+    if (!project) return next(errorHandler(404, 'Project not found'));
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const docs = await Comment.find({ targetType: 'project', targetId: project._id, parentId: null })
+      .sort({ createdAt: -1 })
+      .skip((+page - 1) * +limit)
+      .limit(+limit);
+    const total = await Comment.countDocuments({ targetType: 'project', targetId: project._id, parentId: null });
+    const items = docs.map((c) => ({
+      ...c.toObject(),
+      liked: !!(
+        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
+        (ip && c.likedByIps?.includes(String(ip)))
+      ),
+    }));
+    res.json({ items, page: +page, total });
+  } catch (e) { next(e); }
+};
+
 // Public: Search across posts and projects
 export const searchAll = async (req, res, next) => {
   try {
     const q = (req.query.q || '').toString();
     if (!q) return res.json({ posts: [], projects: [] });
     const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    const postFilter = { $or: [{ title: rx }, { tagline: rx }, { tags: rx }] };
-    const projectFilter = { $or: [{ title: rx }, { tagline: rx }, { tags: rx }] };
+  const publishedOrLegacy = { $or: [{ status: 'published' }, { status: { $exists: false } }] };
+  const postFilter = { $and: [publishedOrLegacy, { $or: [{ title: rx }, { tagline: rx }, { tags: rx }] }] };
+  const projectFilter = { $and: [publishedOrLegacy, { $or: [{ title: rx }, { tagline: rx }, { tags: rx }] }] };
     const [posts, projects] = await Promise.all([
       Post.find(postFilter).sort({ createdAt: -1 }).limit(50),
       Project.find(projectFilter).sort({ createdAt: -1 }).limit(50),
     ]);
     res.json({ posts, projects });
+  } catch (e) { next(e); }
+};
+
+// Public: Related posts by overlapping tags/languages
+export const getRelatedPosts = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const isObjectId = !!(id && Types.ObjectId.isValid(id));
+    const query = isObjectId ? { _id: id } : { slug: id };
+    const post = await Post.findOne(query).select({ tags: 1, languages: 1 });
+    if (!post) return next(errorHandler(404, 'Post not found'));
+    const tags = Array.isArray(post.tags) ? post.tags : [];
+    const languages = Array.isArray(post.languages) ? post.languages : [];
+    const related = await Post.find({
+      _id: { $ne: post._id },
+      $or: [
+        ...(tags.length ? [{ tags: { $in: tags } }] : []),
+        ...(languages.length ? [{ languages: { $in: languages } }] : []),
+      ],
+      // Only surface published posts (or legacy without status) in related list
+      $and: [ { $or: [ { status: 'published' }, { status: { $exists: false } } ] } ],
+    })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .select({ title: 1, slug: 1, coverImageUrl: 1, createdAt: 1, tags: 1, tagline: 1 });
+    res.json({ items: related });
   } catch (e) { next(e); }
 };

@@ -1,6 +1,18 @@
-export default function PublishBar({ loading, label = 'Publish', onClick }) {
+import PropTypes from 'prop-types';
+
+export default function PublishBar({ loading, label = 'Publish', onClick, onDraft, draftLabel = 'Save Draft' }) {
   return (
-    <div className="flex items-center justify-end">
+    <div className="flex items-center justify-end gap-2">
+      {onDraft && (
+        <button
+          type="button"
+          onClick={onDraft}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-200 shadow-sm transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 disabled:opacity-60"
+        >
+          {loading ? 'Saving…' : draftLabel}
+        </button>
+      )}
       <button
         type="button"
         onClick={onClick}
@@ -13,3 +25,11 @@ export default function PublishBar({ loading, label = 'Publish', onClick }) {
     </div>
   );
 }
+
+PublishBar.propTypes = {
+  loading: PropTypes.bool,
+  label: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
+  onDraft: PropTypes.func,
+  draftLabel: PropTypes.string,
+};

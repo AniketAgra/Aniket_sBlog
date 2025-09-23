@@ -6,6 +6,7 @@ export default function About() {
   const { currentUser } = useSelector(s => s.user);
   const [downloading, setDownloading] = useState(false);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+  // Lead form no longer used; resume download requires login and uses user model data
 
   // Set the document title for SEO and accessibility
   useEffect(() => {
@@ -62,10 +63,10 @@ export default function About() {
                   </p>
                 </div>
                 <p className="text-base leading-relaxed text-gray-600 dark:text-gray-300">
-                  I'm a software engineer with over 5 years of experience in
+                  I&#39;m a software engineer with over 5 years of experience in
                   developing and implementing scalable and efficient software
                   solutions. My expertise lies in full-stack development, with a
-                  strong focus on front-end technologies and user experience. I'm
+                  strong focus on front-end technologies and user experience. I&#39;m
                   passionate about creating innovative products that solve
                   real-world problems and continuously improve my skills through
                   learning and collaboration.

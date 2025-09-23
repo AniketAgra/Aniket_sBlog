@@ -14,6 +14,7 @@ import publicProjectsRoutes from './routes/projects.route.js';
 import uploadRoutes from '../api/routes/upload.route.js';
 import resumeRoutes from '../api/routes/resume.route.js';
 import newsletterRoutes from '../api/routes/newsletter.route.js';
+import commentsRoutes from '../api/routes/comments.route.js';
 // Fallback direct bindings in case router import fails silently in some environments
 import { subscribe as subscribeController, verifySubscription as verifySubscriptionController } from '../api/controllers/newsletter.controller.js';
 import apiRateLimiter from '../api/middleware/rateLimiter.js';
@@ -79,6 +80,7 @@ app.use('/api', publicProjectsRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', resumeRoutes);
 app.use('/api', newsletterRoutes);
+app.use('/api', commentsRoutes);
 
 // Explicit endpoints to ensure availability (keeps same paths)
 app.post('/api/subscribe', apiRateLimiter, subscribeController);

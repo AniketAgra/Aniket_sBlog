@@ -1,8 +1,20 @@
 import styles from '../styles/components/PostCard.module.css';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 
 export default function PostCard({ post }) {
+  // Unique tags from DB: merge languages + tags, case-insensitive dedupe
+  const uniqueTags = useMemo(() => {
+    const arr = [
+      ...(Array.isArray(post?.languages) ? post.languages : []),
+      ...(Array.isArray(post?.tags) ? post.tags : []),
+    ]
+      .map((t) => String(t).trim())
+      .filter(Boolean);
+    const uniqLower = [...new Set(arr.map((t) => t.toLowerCase()))];
+    return uniqLower.map((t) => t.charAt(0).toUpperCase() + t.slice(1));
+  }, [post?.languages, post?.tags]);
   return (
     <article className={styles.card}>
       <div className={styles.media}>
@@ -20,13 +32,15 @@ export default function PostCard({ post }) {
         ) : (
           <p className={styles.excerpt}>{post.excerpt}</p>
         )}
-        <div className={styles.tagsRow}>
-          {post.tags?.map((tag) => (
-            <span key={tag} className={`${styles.tag} ${styles.tagGradient}`}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        {uniqueTags.length > 0 && (
+          <div className={styles.tagsRow}>
+            {uniqueTags.map((tag) => (
+              <span key={tag} className={`${styles.tag} ${styles.tagGradient}`}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
   <Link to={post._id ? `/posts/${post._id}` : '#'} className={styles.readMore}>
           Read more →
         </Link>
@@ -46,6 +60,7 @@ PostCard.propTypes = {
     createdAt: PropTypes.string,
     excerpt: PropTypes.string,
     tagline: PropTypes.string,
+  languages: PropTypes.arrayOf(PropTypes.string),
     tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
 };

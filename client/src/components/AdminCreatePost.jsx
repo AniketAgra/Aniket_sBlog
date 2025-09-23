@@ -70,7 +70,7 @@ export default function AdminCreatePost() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
 
-  const onSubmit = async (e) => {
+  const submitWithStatus = async (status = 'published', e) => {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: null });
     try {
@@ -91,6 +91,7 @@ export default function AdminCreatePost() {
         languages: form.languages.split(',').map((s) => s.trim()).filter(Boolean),
         content: form.content,
         coverImageUrl: cover || undefined,
+        status,
       };
       const res = await fetch('/api/admin/posts', {
         method: 'POST',
@@ -98,9 +99,10 @@ export default function AdminCreatePost() {
         credentials: 'include',
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to create post');
-      setStatus({ loading: false, error: null, success: 'Post created' });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to create post');
+  const successMsg = status === 'draft' ? 'Saved as draft' : 'Post published';
+  setStatus({ loading: false, error: null, success: successMsg });
       setForm({ title: '', tagline: '', tags: '', languages: '', coverImageUrl: '', content: '' });
       setImage(null);
       setImageUploadProgress(null);
@@ -109,6 +111,9 @@ export default function AdminCreatePost() {
       setStatus({ loading: false, error: err.message, success: null });
     }
   };
+
+  const onSubmit = (e) => submitWithStatus('published', e);
+  const onSaveDraft = (e) => submitWithStatus('draft', e);
 
   return (
     <div>
@@ -143,7 +148,7 @@ export default function AdminCreatePost() {
 
         <Editor value={form.content} onChange={(v) => setForm((f) => ({ ...f, content: v }))} />
 
-        <PublishBar loading={status.loading} label="Publish Post" onClick={onSubmit} />
+  <PublishBar loading={status.loading} label="Publish Post" onClick={onSubmit} onDraft={onSaveDraft} draftLabel="Save Draft" />
         {status.error && <p className="text-red-400 text-sm">{status.error}</p>}
         {status.success && <p className="text-emerald-400 text-sm">{status.success}</p>}
       </form>

@@ -45,9 +45,21 @@ export default function DashSidebar() {
                                         <Link to='/dashboard?tab=create-post'>
                                                 <Sidebar.Item active={tab==='create-post'} as='div' className={styles.hoverItem}>Create Post</Sidebar.Item>
                                         </Link>
-                                        <Link to='/dashboard?tab=create-project'>
+                    <Link to='/dashboard?tab=create-project'>
                                                 <Sidebar.Item active={tab==='create-project'} as='div' className={styles.hoverItem}>Create Project</Sidebar.Item>
                                         </Link>
+                    <Link to='/dashboard?tab=manage-posts'>
+                        <Sidebar.Item active={tab==='manage-posts'} as='div' className={styles.hoverItem}>Manage Posts</Sidebar.Item>
+                    </Link>
+                    <Link to='/dashboard?tab=manage-projects'>
+                        <Sidebar.Item active={tab==='manage-projects'} as='div' className={styles.hoverItem}>Manage Projects</Sidebar.Item>
+                    </Link>
+                    <Link to='/dashboard?tab=subscribers'>
+                        <Sidebar.Item active={tab==='subscribers'} as='div' className={styles.hoverItem}>Subscribers</Sidebar.Item>
+                    </Link>
+                    <Link to='/dashboard?tab=resume-downloads'>
+                        <Sidebar.Item active={tab==='resume-downloads'} as='div' className={styles.hoverItem}>Resume Downloads</Sidebar.Item>
+                    </Link>
                                     </>
                                 )}
                 <Sidebar.Item icon={HiArrowSmRight}  className={[styles.hoverItem,'cursor-pointer'].join(' ')} onClick={handleSignOut}>Sign Out</Sidebar.Item>

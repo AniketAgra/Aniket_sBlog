@@ -7,6 +7,8 @@ const postSchema = new mongoose.Schema(
     slug: { type: String, required: true, unique: true, index: true },
     content: { type: String, required: true }, // Markdown
     coverImageUrl: { type: String },
+  // Publication status: 'draft' or 'published'
+  status: { type: String, enum: ['draft', 'published'], default: 'published', index: true },
   languages: { type: [String], default: [] },
   tagline: { type: String, default: '' },
   tags: { type: [String], default: [] },

@@ -79,3 +79,24 @@ export async function verifySubscription(req, res, next) {
     next(err);
   }
 }
+
+// Admin: List subscribers with pagination and optional search by email
+export async function listSubscribers(req, res, next) {
+  try {
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
+    const skip = (page - 1) * limit;
+    const search = (req.query.search || '').toString().trim();
+    const rx = search ? new RegExp(search.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'), 'i') : null;
+    const filter = rx ? { email: rx } : {};
+
+    const [items, total] = await Promise.all([
+      Subscriber.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Subscriber.countDocuments(filter),
+    ]);
+
+    res.json({ items, page, total });
+  } catch (err) {
+    next(err);
+  }
+}

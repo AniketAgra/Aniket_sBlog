@@ -1,0 +1,28 @@
+.section { margin-top: 2rem; }
+.title { color: #e9d5ff; font-size: 1.1rem; margin-bottom: .6rem; }
+.loading, .error { color: #d1d5db; }
+.list { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
+.item { border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); border-radius:.75rem; padding:.75rem .9rem; }
+.head { display:flex; gap:.6rem; align-items:center; }
+.avatar { width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.08); object-fit:cover; }
+.meta { display:flex; flex-direction:column; }
+.date { color:#9ca3af; font-size:.8rem; }
+.body { margin:.35rem 0 0; color:#e5e7eb; }
+.mention { color:#93c5fd; background: rgba(147,197,253,.12); padding: .05rem .35rem; border-radius:.35rem; margin-right:.25rem; }
+.editedTag { margin-left:.4rem; padding:.05rem .35rem; border:1px solid rgba(255,255,255,.15); color:#9ca3af; border-radius:.35rem; font-size:.7rem; }
+
+/* Like button styles for comments */
+.likeBtn {
+	background: transparent;
+	border: none;
+	color: #9ca3af; /* grey when not liked */
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: .35rem;
+	padding: .15rem .25rem;
+	border-radius: .35rem;
+}
+.likeBtn:hover { background: rgba(255,255,255,.06); }
+.heartActive { color: #ef4444; } /* red when liked */
+.likeCount { color: #e5e7eb; font-size: .9rem; }

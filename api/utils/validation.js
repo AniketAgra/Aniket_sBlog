@@ -14,7 +14,13 @@ export const loginSchema = Joi.object({
 
 export const createPostSchema = Joi.object({
   title: Joi.string().min(3).max(200).required(),
-  content: Joi.string().min(1).required(),
+  status: Joi.string().valid('draft', 'published').optional(),
+  content: Joi.alternatives()
+    .conditional('status', {
+      is: 'draft',
+      then: Joi.string().allow('').optional(),
+      otherwise: Joi.string().min(1).required(),
+    }),
   coverImageUrl: Joi.string().uri().optional(),
   languages: Joi.array().items(Joi.string().min(1)).default([]),
   tagline: Joi.string().max(300).allow('').optional(),
@@ -23,7 +29,13 @@ export const createPostSchema = Joi.object({
 
 export const updatePostSchema = Joi.object({
   title: Joi.string().min(3).max(200).optional(),
-  content: Joi.string().min(1).optional(),
+  status: Joi.string().valid('draft', 'published').optional(),
+  content: Joi.alternatives()
+    .conditional('status', {
+      is: 'draft',
+      then: Joi.string().allow('').optional(),
+      otherwise: Joi.string().min(1).optional(),
+    }),
   coverImageUrl: Joi.string().uri().optional(),
   languages: Joi.array().items(Joi.string().min(1)).optional(),
   tagline: Joi.string().max(300).allow('').optional(),
@@ -46,7 +58,13 @@ export const postUpdateSchema = updatePostSchema;
 // Project schemas
 export const projectCreateSchema = Joi.object({
   title: Joi.string().min(3).max(200).required(),
-  content: Joi.string().min(1).required(),
+  status: Joi.string().valid('draft', 'published').optional(),
+  content: Joi.alternatives()
+    .conditional('status', {
+      is: 'draft',
+      then: Joi.string().allow('').optional(),
+      otherwise: Joi.string().min(1).required(),
+    }),
   coverImageUrl: Joi.string().uri().optional(),
   languages: Joi.array().items(Joi.string().min(1)).default([]),
   tagline: Joi.string().max(300).allow('').optional(),
@@ -57,7 +75,13 @@ export const projectCreateSchema = Joi.object({
 
 export const projectUpdateSchema = Joi.object({
   title: Joi.string().min(3).max(200).optional(),
-  content: Joi.string().min(1).optional(),
+  status: Joi.string().valid('draft', 'published').optional(),
+  content: Joi.alternatives()
+    .conditional('status', {
+      is: 'draft',
+      then: Joi.string().allow('').optional(),
+      otherwise: Joi.string().min(1).optional(),
+    }),
   coverImageUrl: Joi.string().uri().optional(),
   languages: Joi.array().items(Joi.string().min(1)).optional(),
   tagline: Joi.string().max(300).allow('').optional(),
@@ -69,4 +93,10 @@ export const projectUpdateSchema = Joi.object({
 export const commentCreateSchema = Joi.object({
   username: Joi.string().min(1).max(50).required(),
   text: Joi.string().min(1).max(1000).required(),
+});
+
+// Resume download optional info for anonymous users
+export const resumeDownloadInfoSchema = Joi.object({
+  name: Joi.string().min(1).max(100).trim().required(),
+  email: Joi.string().email().required(),
 });

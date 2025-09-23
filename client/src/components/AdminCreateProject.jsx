@@ -70,7 +70,7 @@ export default function AdminCreateProject() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
 
-  const onSubmit = async (e) => {
+  const submitWithStatus = async (status = 'published', e) => {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: null });
     try {
@@ -91,6 +91,7 @@ export default function AdminCreateProject() {
         coverImageUrl: cover || undefined,
         demoUrl: form.demoUrl || undefined,
         repoUrl: form.repoUrl || undefined,
+        status,
       };
       const res = await fetch('/api/admin/projects', {
         method: 'POST',
@@ -98,9 +99,10 @@ export default function AdminCreateProject() {
         credentials: 'include',
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to create project');
-      setStatus({ loading: false, error: null, success: 'Project created' });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to create project');
+  const successMsg = status === 'draft' ? 'Saved as draft' : 'Project published';
+  setStatus({ loading: false, error: null, success: successMsg });
       setForm({ title: '', tagline: '', tags: '', languages: '', coverImageUrl: '', content: '', demoUrl: '', repoUrl: '' });
       setImage(null);
       setImageUploadProgress(null);
@@ -109,6 +111,9 @@ export default function AdminCreateProject() {
       setStatus({ loading: false, error: err.message, success: null });
     }
   };
+
+  const onSubmit = (e) => submitWithStatus('published', e);
+  const onSaveDraft = (e) => submitWithStatus('draft', e);
 
   return (
     <div>
@@ -151,7 +156,7 @@ export default function AdminCreateProject() {
 
         <Editor label="Description" value={form.content} onChange={(v) => setForm((f) => ({ ...f, content: v }))} />
 
-        <PublishBar loading={status.loading} label="Publish Project" onClick={onSubmit} />
+  <PublishBar loading={status.loading} label="Publish Project" onClick={onSubmit} onDraft={onSaveDraft} draftLabel="Save Draft" />
         {status.error && <p className="text-red-400 text-sm">{status.error}</p>}
         {status.success && <p className="text-emerald-400 text-sm">{status.success}</p>}
       </form>
