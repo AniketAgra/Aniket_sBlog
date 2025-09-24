@@ -1,8 +1,37 @@
 import PropTypes from 'prop-types';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import styles from '../styles/components/ProjectCard.module.css';
 
 export default function ProjectCard({ project, variant = 'grid' }) {
+  // Like state persisted per project
+  const storageKey = useMemo(() => {
+    const id = project?._id || project?.slug || project?.title || 'unknown';
+    return `liked:project:${id}`;
+  }, [project?._id, project?.slug, project?.title]);
+
+  const [liked, setLiked] = useState(false);
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(storageKey);
+      setLiked(v === '1');
+    } catch {
+      /* ignore */
+    }
+  }, [storageKey]);
+
+  const toggleLike = () => {
+    setLiked((prev) => {
+      const next = !prev;
+      try {
+        if (next) localStorage.setItem(storageKey, '1');
+        else localStorage.removeItem(storageKey);
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
   // Helper to truncate long descriptions with an ellipsis
   const truncate = (text, limit = 100) => {
     if (!text) return '';
@@ -25,61 +54,155 @@ export default function ProjectCard({ project, variant = 'grid' }) {
 
   if (variant === 'list') {
     return (
-  <article className="flex gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 backdrop-blur">
+      <article className={styles.listCard}>
         {project.coverImageUrl && (
           <Link to={to} className="block shrink-0">
-            <img src={project.coverImageUrl} alt={project.title} className="h-20 w-20 rounded-md object-cover" />
+            <img src={project.coverImageUrl} alt={project.title} className={styles.listThumb} />
           </Link>
         )}
-        <div className="min-w-0 flex-1">
-          <Link to={to} className="hover:underline">
-            <h3 className="truncate text-sm font-semibold sm:text-base">{project.title}</h3>
-          </Link>
+        <div className={styles.listBody}>
+          <div className={styles.listHeader}>
+            <Link to={to} className="hover:underline">
+              <h3 className={styles.listTitle}>{project.title}</h3>
+            </Link>
+            <div className={styles.listHeaderActions}>
+              <button
+                type="button"
+                aria-pressed={liked}
+                aria-label={liked ? 'Unlike project' : 'Like project'}
+                onClick={toggleLike}
+                className={styles.likeBtn}
+                title={liked ? 'Unlike' : 'Like'}
+              >
+                <svg
+                  className={styles.likeIcon}
+                  width="16" height="16" viewBox="0 0 24 24" fill={liked ? '#f43f5e' : 'none'} stroke="#fda4af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+                </svg>
+              </button>
+              <div className={styles.actionGroup}>
+                {project.demoUrl && (
+                  <a
+                    href={project.demoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`${styles.actionLink} ${styles.iconBtn}`}
+                    aria-label="Open demo"
+                    title="Open demo"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <path d="M15 3h6v6"></path>
+                      <path d="M10 14 21 3"></path>
+                    </svg>
+                  </a>
+                )}
+                {project.repoUrl && (
+                  <a
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`${styles.actionLink} ${styles.iconBtn}`}
+                    aria-label="Open repository"
+                    title="Open repository"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.6v-2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.3.1 2 .1 2.9 1.6 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.4-5.5-6.1 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.6.1-3.4 0 0 1-.3 3.4 1.2a11.6 11.6 0 0 1 6.2 0C18.7 3 19.8 3.3 19.8 3.3c.6 1.8.2 3.1.1 3.4.8.9 1.2 2 1.2 3.3 0 4.7-2.8 5.8-5.5 6.1.4.3.7 1 .7 2v3c0 .4.3.7.8.6A12 12 0 0 0 12 .5Z"/>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
           {project.tagline && (
-            <p className="mt-1 text-xs text-gray-300 sm:text-sm">
-              {truncate(project.tagline, 110)}
-            </p>
+            <p className={styles.listTagline}>{truncate(project.tagline, 110)}</p>
           )}
           {uniqueTags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className={styles.listTags}>
               {uniqueTags.slice(0, 4).map((tag) => (
-                <span key={tag} className="rounded-full bg-fuchsia-500/10 px-2 py-0.5 text-[10px] text-fuchsia-200 ring-1 ring-inset ring-fuchsia-400/20">{tag}</span>
+                <span key={tag} className={`${styles.tag} ${styles.tagGradient}`}>{tag}</span>
               ))}
             </div>
           )}
-          <div className="mt-2 flex gap-3 text-xs text-cyan-300 sm:text-sm">
-            {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noreferrer" className="hover:underline">Demo</a>}
-            {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noreferrer" className="hover:underline">Repo</a>}
-          </div>
         </div>
       </article>
     );
   }
 
   return (
-  <article className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
+    <article className={styles.card}>
       <Link to={to} className="block">
-        {project.coverImageUrl && <img src={project.coverImageUrl} alt={project.title} className="h-36 w-full object-cover sm:h-40" />}
-        <div className="px-3 py-3 sm:px-4">
-          <div className="text-[10px] text-gray-400">{project.createdAt ? new Date(project.createdAt).toLocaleDateString() : ''}</div>
-          <h3 className="mt-1 text-base font-bold leading-snug sm:text-[1.05rem]">{project.title}</h3>
-          {project.tagline && (
-            <p className="mt-1.5 text-sm text-gray-300">
-              {truncate(project.tagline, 90)}
-            </p>
+        <div className={styles.media}>
+          {project.coverImageUrl && (
+            <img src={project.coverImageUrl} alt={project.title} className={styles.img} />
           )}
-          {uniqueTags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {uniqueTags.slice(0, 5).map((tag) => (
-                <span key={tag} className="rounded-full bg-fuchsia-500/10 px-2 py-0.5 text-[10px] text-fuchsia-200 ring-1 ring-inset ring-fuchsia-400/20">{tag}</span>
-              ))}
-            </div>
-          )}
+          <div className={styles.mediaGradient} />
+        </div>
+        <div className={styles.content}>
+          {/* Reserve stable vertical space for header/date/title/description so tags align across cards */}
+          <div className={styles.meta}>
+            <div className={styles.date}>{project.createdAt ? new Date(project.createdAt).toLocaleDateString() : ''}</div>
+            <h3 className={styles.title}>{project.title}</h3>
+            {/* Always render tagline block to keep height consistent, even if empty */}
+            <p className={styles.tagline}>{project.tagline ? truncate(project.tagline, 90) : ''}</p>
+          </div>
+          <div className={styles.tagsRow}>
+            {uniqueTags.slice(0, 5).map((tag) => (
+              <span key={tag} className={`${styles.tag} ${styles.tagGradient}`}>{tag}</span>
+            ))}
+          </div>
         </div>
       </Link>
-      <div className="-mt-2 flex items-center gap-3 px-3 pb-3 text-sm sm:px-4">
-        {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noreferrer" className="text-cyan-300 hover:underline">Demo</a>}
-        {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noreferrer" className="text-cyan-300 hover:underline">Repo</a>}
+      <div className={styles.actions}>
+        <button
+          type="button"
+          aria-pressed={liked}
+          aria-label={liked ? 'Unlike project' : 'Like project'}
+          onClick={toggleLike}
+          className={`${styles.likeBtn} ${styles.tagGradient}`}
+        >
+          <svg
+            className={styles.likeIcon}
+            width="16" height="16" viewBox="0 0 24 24" fill={liked ? '#f43f5e' : 'none'} stroke="#fda4af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+          </svg>
+        </button>
+        <div className={styles.actionGroup}>
+          {project.demoUrl && (
+            <a
+              href={project.demoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={`${styles.actionLink} ${styles.iconBtn}`}
+              aria-label="Open demo"
+              title="Open demo"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <path d="M15 3h6v6"></path>
+                <path d="M10 14 21 3"></path>
+              </svg>
+            </a>
+          )}
+          {project.repoUrl && (
+            <a
+              href={project.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={`${styles.actionLink} ${styles.iconBtn}`}
+              aria-label="Open repository"
+              title="Open repository"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.6v-2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.3.1 2 .1 2.9 1.6 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.4-5.5-6.1 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.6.1-3.4 0 0 1-.3 3.4 1.2a11.6 11.6 0 0 1 6.2 0C18.7 3 19.8 3.3 19.8 3.3c.6 1.8.2 3.1.1 3.4.8.9 1.2 2 1.2 3.3 0 4.7-2.8 5.8-5.5 6.1.4.3.7 1 .7 2v3c0 .4.3.7.8.6A12 12 0 0 0 12 .5Z"/>
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );

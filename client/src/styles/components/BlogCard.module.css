@@ -3,14 +3,47 @@
 .cardLink {
   position: relative;
   border-radius: 1rem; /* rounded-2xl */
-  padding: 1px;
-  /* background: linear-gradient(135deg, rgb(52 211 153 / 0.4), rgb(139 92 246 / 0.4), rgb(236 72 153 / 0.4)); */
-  /* background: rgba(43, 27, 63, 0.5); */
-  background: #10172A;
-  transition: transform 0.3s ease-in-out;
+  padding: 1px; /* makes the animated border visible */
+  /* Theme aurora (violet → pink → cyan) concentrated near bottom corners */
+  background:
+    radial-gradient(120% 90% at 5% 110%, rgba(236, 72, 153, 0.35), transparent 60%),
+    radial-gradient(120% 100% at 100% 110%, rgba(167, 139, 250, 0.35), transparent 60%),
+    radial-gradient(80% 80% at 0% 0%, rgba(34, 211, 238, 0.18), transparent 60%),
+    #0b1220; /* base */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   display: block;
   text-decoration: none;
   color: inherit;
+  height: 100%; /* allow equal height in grids */
+}
+
+/* subtle animated conic border sheen on hover */
+.cardLink::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--_angle, 0deg),
+      rgba(34, 211, 238, 0.35),
+      rgba(167, 139, 250, 0.35),
+      rgba(236, 72, 153, 0.35),
+      rgba(34, 211, 238, 0.35));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude; /* show only the 1px ring */
+  padding: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cardLink:hover::after {
+  opacity: 0.7;
+  animation: rotateAura 6s linear infinite;
+}
+
+@keyframes rotateAura {
+  to { --_angle: 360deg; }
 }
 
 .cardLink:hover {
@@ -21,10 +54,18 @@
 .cardContent {
   border-radius: 1rem; /* rounded-2xl */
   overflow: hidden;
-  background-color: rgb(255 255 255 / 0.05); /* bg-white/5 */
-  backdrop-filter: blur(12px); /* backdrop-blur-md */
-  border: 1px solid rgb(255 255 255 / 0.1); /* border-white/10 */
+  /* Subtle glass gradient, a tad darker for contrast */
+  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.03));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 14px 38px rgba(0,0,0,0.38);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 22rem; /* baseline equal height; tune as needed */
+  position: relative; /* allow positioning of floating like button */
 }
 
 .imageContainer {
@@ -50,11 +91,17 @@
 .imageOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.6), transparent);
+  /* Dark-to-transparent with a hint of theme magenta at the bottom */
+  background:
+    linear-gradient(to top, rgba(12, 6, 20, 0.65), transparent 60%),
+    radial-gradient(80% 40% at 50% 100%, rgba(236, 72, 153, 0.25), transparent 70%);
 }
 
 .cardBody {
   padding: 1.25rem; /* p-5 */
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .cardMeta {
@@ -62,7 +109,7 @@
   align-items: center;
   gap: 0.5rem; /* gap-2 */
   font-size: 0.6875rem; /* text-[11px] */
-  color: rgb(209 213 219); /* text-gray-300 */
+  color: rgb(203 213 225); /* text-slate-300 */
 }
 
 .metaDivider {
@@ -75,7 +122,13 @@
   font-weight: 700; /* font-bold */
   line-height: 1.375; /* leading-snug */
   transition: color 0.3s ease-in-out;
-  color: wheat;
+  color: #f7e3ff; /* warm light heading */
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em; /* reserve two lines */
 }
 
 .cardTagline {
@@ -84,6 +137,12 @@
   color: rgb(209 213 219); /* text-gray-300 */
   line-height: 1.5; /* leading-relaxed */
   font-weight: 500; /* font-medium */
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 4.2em; /* keep area even when short (≈3 lines) */
 }
 
 .cardExcerpt {
@@ -92,6 +151,12 @@
   color: rgb(156 163 175); /* text-gray-400 */
   line-height: 1.4; /* leading-relaxed */
   opacity: 0.9;
+  display: -webkit-box;
+  line-clamp: 3; /* multi-line ellipsis */
+  -webkit-line-clamp: 3; /* multi-line ellipsis */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 4.1em; /* reserve space similar to tagline */
 }
 
 .cardLink:hover .cardTitle {
@@ -103,15 +168,83 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem; /* gap-2 */
+  margin-top: auto; /* push tags to the bottom */
 }
 
 .tag {
   font-size: 0.625rem; /* text-[10px] */
-  font-weight: 400; /* font-medium */
-  color: white !important;
-  padding: 0.125rem 0.5rem; /* px-2 py-0.5 */
+  font-weight: 600; /* font-semibold */
+  color: #f8fafc; /* default light text; overridden in variants */
+  padding: 0.125rem 0.6rem; /* px-2 py-0.5 */
   border-radius: 9999px; /* rounded-full */
-  border: 1px solid rgb(255 255 255 / 0.1); /* ring-1 ring-white/10 */
+  border: 1px solid rgb(255 255 255 / 0.14); /* ring-1 ring-white/10 */
+  background-color: rgba(255,255,255,0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* Project-style subtle pill using theme hue */
+.tagPill {
+  --h: var(--h, 300);
+  color: hsl(var(--h) 70% 90% / 0.95);
+  background: hsl(var(--h) 85% 60% / 0.12);
+  border-color: hsl(var(--h) 80% 60% / 0.28);
+  box-shadow: inset 0 0 0 1px hsl(var(--h) 85% 60% / 0.12);
+}
+
+.tagPill:hover {
+  background: hsl(var(--h) 90% 60% / 0.18);
+  border-color: hsl(var(--h) 85% 60% / 0.38);
+  transform: translateY(-1px);
+}
+
+/* Shiny, vibrant tag constrained to theme hues (violet→pink range). */
+.tagShiny {
+  --h: var(--h, 292); /* hue provided from component */
+  position: relative;
+  /* Softer, cleaner gradient with lower saturation and alpha */
+  background: linear-gradient(180deg,
+      hsl(var(--h) 64% 58% / 0.55),
+      hsl(calc(var(--h) + 8) 58% 52% / 0.45));
+  border-color: hsl(var(--h) 50% 70% / 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 1px 6px hsl(var(--h) 50% 45% / 0.18);
+  overflow: hidden;
+}
+
+.tagShiny::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 1px;
+  height: 45%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.tagShiny::after {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(60deg, transparent 35%, rgba(255,255,255,0.65) 50%, transparent 65%);
+  transform: translateX(-10%) rotate(12deg);
+  opacity: 0; /* only on hover */
+  transition: opacity 0.25s ease, transform 0.6s ease;
+  pointer-events: none;
+}
+
+.tagShiny:hover {
+  transform: translateY(-1px);
+  box-shadow:
+  inset 0 1px 0 rgba(255,255,255,0.4),
+  0 6px 14px hsl(var(--h) 52% 46% / 0.28);
+}
+
+.tagShiny:hover::after {
+  opacity: 0.25;
+  transform: translateX(35%) rotate(12deg);
 }
 
 /* Responsive adjustments */
@@ -132,4 +265,33 @@
     font-size: 0.75rem; /* md:text-xs */
     padding: 0.25rem 0.75rem; /* md:px-3 md:py-1 */
   }
+  .cardContent { min-height: 24rem; }
+}
+
+/* Floating like button bottom-right */
+.likeFab {
+  position: absolute;
+  right: 1.25rem; /* align with cardBody padding */
+  bottom: 1.25rem; /* align with cardBody padding */
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: #fecdd3;
+  background:
+    linear-gradient(180deg, rgba(22,28,45,0.9), rgba(22,28,45,0.9)) padding-box,
+    linear-gradient(135deg, #f43f5e, #fb7185 60%, #fecaca) border-box;
+  box-shadow: 0 10px 24px rgba(244,63,94,.20), inset 0 0 0 9999px rgba(255,255,255,.02);
+  z-index: 2;
+}
+.likeFab:hover{
+  box-shadow: 0 12px 26px rgba(244,63,94,.28), inset 0 0 0 9999px rgba(255,255,255,.03);
+}
+
+@media (min-width: 768px) {
+  .likeFab { right: 1.5rem; bottom: 1.5rem; }
 }

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { AiOutlineSearch } from 'react-icons/ai';
 import styles from '../styles/components/BlogSearchFilter.module.css';
+import SelectMenu from './SelectMenu';
 
 /**
  * BlogSearchFilter
@@ -10,7 +11,7 @@ import styles from '../styles/components/BlogSearchFilter.module.css';
  * - onChange: (nextValue) => void
  */
 export default function BlogSearchFilter({ value, onChange }) {
-  const { q = '', category = 'all' } = value || {};
+  const { q = '', category = 'all', sort = 'newest' } = value || {};
 
   const categories = [
     { key: 'all', label: 'All' },
@@ -32,6 +33,19 @@ export default function BlogSearchFilter({ value, onChange }) {
           />
         </div>
         <div className={styles.rightGroup}>
+          <SelectMenu
+            options={[
+              { value: 'newest', label: 'Newest' },
+              { value: 'oldest', label: 'Oldest' },
+              { value: 'az', label: 'A–Z' },
+              { value: 'za', label: 'Z–A' },
+              { value: 'liked', label: 'Most Liked' },
+            ]}
+            value={sort}
+            onChange={(v) => onChange({ ...value, sort: v })}
+            srLabel="Sort posts"
+            className={styles.sortWrap}
+          />
           <div className={styles.chips}>
             {categories.map((c) => (
               <button
@@ -54,7 +68,8 @@ export default function BlogSearchFilter({ value, onChange }) {
 BlogSearchFilter.propTypes = {
   value: PropTypes.shape({
     q: PropTypes.string,
-    category: PropTypes.oneOf(['all', 'mern', 'react', 'personal']),
+  category: PropTypes.oneOf(['all', 'mern', 'react', 'personal']),
+  sort: PropTypes.oneOf(['newest', 'oldest', 'az', 'za', 'liked']),
   }),
   onChange: PropTypes.func.isRequired,
 };
