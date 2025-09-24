@@ -92,65 +92,50 @@ export default function About() {
 
               <div className="space-y-10 md:space-y-14">
               {timelineItems.map((item, idx) => (
-                <div key={idx} className="relative flex items-center min-h-[96px] mb-7 md:min-h-[112px]">
-                  {/* Left side for md+ */}
-                  {idx % 2 === 0 ? (
-                    <div className="hidden md:flex w-1/2 justify-end pr-2 lg:pr-4 text-right">
-                        <div className={`border border-white/10 shadow-lg ${styles.glass} ${styles.timelineCard} ${styles.timelineCardLeft}`}>
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {item.role}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.period}
-                        </p>
-                      </div>
+                <div key={idx} className="relative mb-7 md:mb-10">
+                  {/* Mobile (single column) */}
+                  <div className="pl-16 pr-2 md:hidden">
+                    <div className={`rounded-lg border border-white/10 p-5 shadow-lg ${styles.glass}`}>
+                      <p className="font-semibold text-gray-900 dark:text-white">{item.role}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.period}</p>
                     </div>
-                  ) : (
-                    <div className="w-1/2 mr-10 pr-6 text-right md:w-1/2 md:pr-8">
-                      <div className={`rounded-lg border border-white/10 p-5 shadow-lg md:hidden ${styles.glass}`}>
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {item.role}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.period}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  </div>
 
-                  {/* Icon */}
-                  <div className="absolute left-1/2 -translate-x-1/2">
-                    <div className={`z-10 flex h-12 w-12 items-center justify-center rounded-full bg-background-light dark:bg-background-dark ${styles.iconHalo}`}>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white">
+                  {/* Icon position */}
+                  <div className={`${styles.iconPos}`}>
+                    <div className={`z-10 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-background-light dark:bg-background-dark ${styles.iconHalo}`}>
+                      <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-primary text-white">
                         <item.Icon size={20} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Right side for md+ */}
-                  {idx % 2 === 0 ? (
-                    <div className="w-1/2 ml-10 pl-6 md:w-1/2 md:pl-2 lg:pl-4">
-                      <div className={`rounded-lg border border-white/10 p-5 shadow-lg md:hidden ${styles.glass}`}>
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {item.role}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.period}
-                        </p>
+                  {/* Desktop/Tablet alternating layout */}
+                  <div className="hidden md:flex items-center min-h-[112px]">
+                    {/* Left side for md+ */}
+                    {idx % 2 === 0 ? (
+                      <div className="hidden md:flex w-1/2 justify-end pr-4 lg:pr-6 text-right">
+                        <div className={`about-text border border-white/10 shadow-lg ${styles.glass} ${styles.timelineCard} ${styles.timelineCardLeft}`}>
+                          <p className="font-semibold text-gray-900 dark:text-white">{item.role}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.period}</p>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="hidden w-1/2 pl-2 lg:pl-4 md:flex">
+                    ) : (
+                      <div className="w-1/2" />
+                    )}
+
+                    {/* Right side for md+ */}
+                    {idx % 2 === 0 ? (
+                      <div className="w-1/2" />
+                    ) : (
+                      <div className="hidden w-1/2 pl-4 lg:pl-6 md:flex">
                         <div className={`border border-white/10 shadow-lg ${styles.glass} ${styles.timelineCard} ${styles.timelineCardRight}`}>
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {item.role}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.period}
-                        </p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{item.role}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.period}</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
               </div>

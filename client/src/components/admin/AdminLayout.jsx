@@ -1,5 +1,7 @@
 import GradientBackground from './GradientBackground';
 import GlassCard from './GlassCard';
+import MobileDashboardNav from './MobileDashboardNav';
+import PropTypes from 'prop-types';
 
 export default function AdminLayout({ sidebar, children }) {
   return (
@@ -10,9 +12,16 @@ export default function AdminLayout({ sidebar, children }) {
           <GlassCard className="sticky top-8 p-0 overflow-hidden">{sidebar}</GlassCard>
         </div>
         <div className="flex-1 min-w-0">
+          {/* Mobile quick nav */}
+          <MobileDashboardNav />
           {children}
         </div>
       </div>
     </div>
   );
 }
+
+AdminLayout.propTypes = {
+  sidebar: PropTypes.node,
+  children: PropTypes.node,
+};

@@ -3,6 +3,7 @@ import SectionHeader from './SectionHeader';
 import GlassCard from './GlassCard';
 import ConfirmModal from '../ConfirmModal';
 import { AiOutlineSearch } from 'react-icons/ai';
+import { Link } from 'react-router-dom';
 import SelectMenu from '../SelectMenu';
 import { HiOutlineEye, HiOutlinePencil, HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi';
 
@@ -150,16 +151,14 @@ export default function ManagePosts() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1.5">
-                      <a
-                        href={`/posts/${p.slug || p._id}`}
-                        target="_blank"
-                        rel="noreferrer"
+                      <Link
+                        to={`/posts/${p.slug || p._id}`}
                         title="View"
                         className="group rounded-lg p-2 text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
                         aria-label={`View ${p.title}`}
                       >
                         <HiOutlineEye size={18} />
-                      </a>
+                      </Link>
                       <a
                         href={`/dashboard?tab=edit-post&id=${p._id}`}
                         title="Edit"

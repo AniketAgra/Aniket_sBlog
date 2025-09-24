@@ -133,7 +133,7 @@ export default function Blog() {
         {/* Grid of posts with gating for unauthenticated users */}
         <section aria-labelledby="blog-heading" className={styles.grid}>
           {(currentUser ? sortedItems : sortedItems.slice(0, 3)).map((post) => (
-            <BlogCard key={post._id} post={post} />
+            <BlogCard key={post._id} post={post} onRequireAuth={() => setShowPrompt(true)} />
           ))}
         </section>
 
@@ -152,7 +152,7 @@ export default function Blog() {
 
         {/* Inline sign-in prompt */}
         {showPrompt && !currentUser && (
-          <SignInPrompt onClose={() => setShowPrompt(false)} message="Create a free account or sign in to view all blog posts." />
+          <SignInPrompt onClose={() => setShowPrompt(false)} message="Create a free account or sign in to view all blog posts and interact (like, comment)." />
         )}
 
       </div>

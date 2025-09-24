@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -10,6 +10,7 @@ import { signOut } from '../redux/user/userSlice';
 export default function HeaderCustom(){
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const sheetRef = useRef(null);
   const path = useLocation().pathname;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,6 +28,24 @@ export default function HeaderCustom(){
       }
     }catch(e){/* no-op */}
   };
+
+  // Close mobile menu on route change
+  useEffect(() => { setOpen(false); }, [path]);
+
+  // Lock scroll when mobile menu is open and handle Escape
+  useEffect(() => {
+    const keyHandler = (e) => { if (e.key === 'Escape') setOpen(false); };
+    if (open) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', keyHandler);
+      // focus the sheet for better a11y
+      setTimeout(() => { sheetRef.current?.focus?.(); }, 0);
+    } else {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', keyHandler);
+    }
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', keyHandler); };
+  }, [open]);
 
   return (
     <header className={styles.root}>
@@ -74,32 +93,41 @@ export default function HeaderCustom(){
             </Link>
           )}
 
-      <button className={styles.toggleBtn} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
+      <button className={styles.toggleBtn} aria-controls='mobile-nav' aria-expanded={open} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
             <AiOutlineMenu />
           </button>
         </div>
       </div>
 
-    {/* Mobile collapse only */}
-    <nav className={`${styles.collapse} ${open ? styles.open : ''}`}> 
-        <div className={styles.container}>
-          <div className={styles.collapseInner}>
-            <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
-            <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
-            <Link to='/posts' className={`${styles.navLink} ${path==='/posts' ? styles.active : ''}`}>Blog</Link>
-            <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
-            {currentUser && (
-              <Link to='/dashboard?tab=profile' className={`${styles.navLink} ${styles.mobileOnly} ${path.startsWith('/dashboard') ? styles.active : ''}`}>Dashboard</Link>
-            )}
-            {isAdmin && (
-              <>
-                <Link to='/dashboard?tab=create-post' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Post</Link>
-                <Link to='/dashboard?tab=create-project' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Project</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+    {/* Mobile overlay nav */}
+    {open && <button aria-hidden className={styles.backdrop} onClick={()=>setOpen(false)} />}
+    <nav
+      id='mobile-nav'
+      ref={sheetRef}
+      tabIndex={-1}
+      aria-label='Mobile'
+      className={`${styles.sheet} ${open ? styles.sheetOpen : ''}`}
+    > 
+      <div className={styles.collapseInner}>
+        <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
+        <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
+        <Link to='/posts' className={`${styles.navLink} ${path==='/posts' ? styles.active : ''}`}>Blog</Link>
+        <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
+        {currentUser && (
+          <Link to='/dashboard?tab=profile' className={`${styles.navLink} ${styles.mobileOnly} ${path.startsWith('/dashboard') ? styles.active : ''}`}>Dashboard</Link>
+        )}
+        {/* {isAdmin && (
+          <>
+            <Link to='/dashboard?tab=create-post' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Post</Link>
+            <Link to='/dashboard?tab=create-project' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Project</Link>
+            <Link to='/dashboard?tab=manage-posts' className={`${styles.navLink} ${styles.mobileOnly}`}>Manage Posts</Link>
+            <Link to='/dashboard?tab=manage-projects' className={`${styles.navLink} ${styles.mobileOnly}`}>Manage Projects</Link>
+            <Link to='/dashboard?tab=subscribers' className={`${styles.navLink} ${styles.mobileOnly}`}>Subscribers</Link>
+            <Link to='/dashboard?tab=resume-downloads' className={`${styles.navLink} ${styles.mobileOnly}`}>Resume Downloads</Link>
+          </>
+        )} */}
+      </div>
+    </nav>
     </header>
   );
 }

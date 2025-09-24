@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styles from '../styles/components/BlogCard.module.css';
+// SignInPrompt is rendered by parent page; this component only signals via onRequireAuth
 
 // Capitalize the first letter, rest lowercase
 function capitalize(str) {
@@ -28,7 +30,8 @@ function hueForTag(tag) {
   return h;
 }
 
-export default function BlogCard({ post }) {
+export default function BlogCard({ post, onRequireAuth }) {
+  const currentUser = useSelector((s) => s.user?.currentUser);
   // Like state persisted per post
   const storageKey = useMemo(() => {
     const id = post?._id || post?.slug || post?.title || 'unknown';
@@ -36,27 +39,70 @@ export default function BlogCard({ post }) {
   }, [post?._id, post?.slug, post?.title]);
 
   const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(typeof post?.likes === 'number' ? Number(post.likes) : 0);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
+    // Only reflect saved like state for authenticated users
+    if (!currentUser) { setLiked(false); setLikes(0); return; }
     try {
       const v = localStorage.getItem(storageKey);
       setLiked(v === '1');
     } catch {
       /* ignore */
     }
-  }, [storageKey]);
+  }, [storageKey, currentUser]);
 
-  const onToggleLike = (e) => {
+  // Fetch live counters (likes) to reflect DB state on cards
+  useEffect(() => {
+    let active = true;
+    const id = post?._id || post?.slug;
+    if (!id || !currentUser) return () => { active = false; };
+  (async () => {
+      try {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}/counters`, { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) return;
+        if (!active) return;
+        if (typeof data?.likes === 'number') setLikes(Number(data.likes));
+    if (typeof data?.liked === 'boolean') setLiked(!!data.liked);
+      } catch (_) {
+        // silent
+      }
+    })();
+    return () => { active = false; };
+  }, [post?._id, post?.slug, currentUser]);
+
+  const onToggleLike = async (e) => {
     // Prevent Link navigation when clicking the like button
     e.preventDefault();
     e.stopPropagation();
-    setLiked((prev) => {
-      const next = !prev;
-      try {
-        if (next) localStorage.setItem(storageKey, '1');
-        else localStorage.removeItem(storageKey);
-      } catch {/* ignore */}
-      return next;
-    });
+  if (!currentUser) { onRequireAuth?.(); return; }
+    if (!post?._id || busy) return;
+    // optimistic toggle
+    const next = !liked;
+    setLiked(next);
+    setLikes((n) => n + (next ? 1 : -1));
+    try {
+      setBusy(true);
+      const res = await fetch(`/api/posts/${encodeURIComponent(post._id)}/like`, { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to like');
+      // sync local storage to reflect server state
+      // try {
+      //   if (data?.liked) localStorage.setItem(storageKey, '1');
+      //   else localStorage.removeItem(storageKey);
+      // } catch {
+      //   /* ignore */
+      // }
+      if (typeof data?.liked === 'boolean') setLiked(!!data.liked);
+      if (typeof data?.likes === 'number') setLikes(Number(data.likes));
+    } catch (_) {
+      // revert on failure
+      setLiked((v) => !v);
+      setLikes((n) => n + (next ? -1 : 1));
+    } finally {
+      setBusy(false);
+    }
   };
   // Short excerpt from markdown
   const getExcerpt = (content) => {
@@ -75,7 +121,8 @@ export default function BlogCard({ post }) {
   ].map(capitalize);
 
   return (
-    <Link to={`/posts/${post._id}` } className={styles.cardLink}>
+    <>
+  <Link to={`/posts/${post._id}` } className={styles.cardLink}>
       <div className={styles.cardContent}>
         {post.coverImageUrl && (
           <div className={styles.imageContainer}>
@@ -126,8 +173,9 @@ export default function BlogCard({ post }) {
           className={styles.likeFab}
           aria-pressed={liked}
           aria-label={liked ? 'Unlike post' : 'Like post'}
-          title={liked ? 'Unlike' : 'Like'}
+          title={currentUser ? `${liked ? 'Unlike' : 'Like'} • ${Number(likes) || 0} likes` : 'Sign in to like'}
           onClick={onToggleLike}
+          disabled={busy}
         >
           <svg
             width="18" height="18" viewBox="0 0 24 24"
@@ -139,6 +187,7 @@ export default function BlogCard({ post }) {
         </button>
       </div>
     </Link>
+    </>
   );
 }
 
@@ -149,10 +198,12 @@ BlogCard.propTypes = {
     title: PropTypes.string.isRequired,
     createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
     views: PropTypes.number,
+  likes: PropTypes.number,
     tagline: PropTypes.string,
     content: PropTypes.string,
     coverImageUrl: PropTypes.string,
     languages: PropTypes.arrayOf(PropTypes.string),
     tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
+  onRequireAuth: PropTypes.func,
 };

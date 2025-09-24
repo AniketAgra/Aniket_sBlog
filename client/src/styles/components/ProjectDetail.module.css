@@ -3,6 +3,14 @@
  * The component merges base + project classes so these act as overrides.
  */
 
+/* Nudge the container gradient toward indigo/cyan for projects */
+.container {
+  background:
+    radial-gradient(620px 260px at 10% -6%, rgba(99,102,241,0.18), rgba(99,102,241,0) 60%),
+    radial-gradient(680px 260px at 90% 0%, rgba(14,165,233,0.14), rgba(14,165,233,0) 60%),
+    radial-gradient(420px 220px at -8% 38%, rgba(168,85,247,0.12), rgba(168,85,247,0) 60%);
+}
+
 /* Indigo accent for tags to visually distinguish projects */
 .tag {
   background-color: rgba(99, 102, 241, 0.12);
@@ -24,3 +32,6 @@
 
 /* Red when liked (merged with base). */
 .heartActive { color: #ef4444; }
+
+/* Buttons — keep gradient but bias end toward cyan for projects */
+.button { background: linear-gradient(90deg, #6366f1, #60a5fa 40%, #22d3ee 98%); }

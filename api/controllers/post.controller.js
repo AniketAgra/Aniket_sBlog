@@ -415,9 +415,15 @@ export const getPostCounters = async (req, res, next) => {
     const { id } = req.params;
     const isObjectId = !!(id && Types.ObjectId.isValid(id));
     const query = isObjectId ? { _id: id } : { slug: id };
-    const post = await Post.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1 });
+    const post = await Post.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1, likedByIps: 1 });
     if (!post) return next(errorHandler(404, 'Post not found'));
-    res.json({ likes: post.likes || 0, commentsCount: post.commentsCount || 0, updatedAt: post.updatedAt });
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const liked = !!(
+      (userId && post.likedByUserIds?.some((u) => String(u) === userId)) ||
+      (ip && post.likedByIps?.includes(String(ip)))
+    );
+    res.json({ likes: post.likes || 0, commentsCount: post.commentsCount || 0, updatedAt: post.updatedAt, liked });
   } catch (e) { next(e); }
 };
 
@@ -427,9 +433,15 @@ export const getProjectCounters = async (req, res, next) => {
     const { id } = req.params;
     const isObjectId = !!(id && Types.ObjectId.isValid(id));
     const query = isObjectId ? { _id: id } : { slug: id };
-    const project = await Project.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1 });
+    const project = await Project.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1, likedByIps: 1 });
     if (!project) return next(errorHandler(404, 'Project not found'));
-    res.json({ likes: project.likes || 0, commentsCount: project.commentsCount || 0, updatedAt: project.updatedAt });
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
+    const userId = req.user?.id ? String(req.user.id) : null;
+    const liked = !!(
+      (userId && project.likedByUserIds?.some((u) => String(u) === userId)) ||
+      (ip && project.likedByIps?.includes(String(ip)))
+    );
+    res.json({ likes: project.likes || 0, commentsCount: project.commentsCount || 0, updatedAt: project.updatedAt, liked });
   } catch (e) { next(e); }
 };
 
