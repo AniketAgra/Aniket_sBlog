@@ -61,9 +61,9 @@ app.use(helmet({
             // Allow styles from self and inline styles (used by many UI libs)
             styleSrc: ["'self'", "'unsafe-inline'"],
             // Scripts from self + Google APIs (for OAuth widgets)
-            scriptSrc: ["'self'", 'https://apis.google.com'],
+            scriptSrc: ["'self'", 'https://apis.google.com', 'https://www.gstatic.com', 'https://accounts.google.com'],
             // Be explicit for element-level script policy too
-            scriptSrcElem: ["'self'", 'https://apis.google.com'],
+            scriptSrcElem: ["'self'", 'https://apis.google.com', 'https://www.gstatic.com', 'https://accounts.google.com'],
             // Images from self, data URIs, blobs, and selected trusted hosts
             imgSrc: [
                 "'self'",
@@ -74,6 +74,7 @@ app.use(helmet({
                 'https://res.cloudinary.com',
                 'https://i.pravatar.cc',
                 'https://lh3.googleusercontent.com',
+                'https://*.googleusercontent.com',
                 ...extraImgDomains,
             ],
             // XHR/fetch targets: self, Cloudinary API, and Firebase/Google auth endpoints
@@ -84,6 +85,8 @@ app.use(helmet({
                 'https://www.googleapis.com',
                 'https://securetoken.googleapis.com',
                 'https://identitytoolkit.googleapis.com',
+                'https://oauth2.googleapis.com',
+                'https://www.gstatic.com',
                 ...extraConnectDomains,
             ],
             // Allow Google auth frames/popups
