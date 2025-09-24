@@ -96,6 +96,7 @@ app.use(helmet({
                 'https://apis.google.com',
                 // Firebase Auth helper iframe lives on project .firebaseapp.com
                 'https://*.firebaseapp.com',
+                'https://*.googleusercontent.com',
                 ...extraFrameDomains,
             ],
             // Older browsers still rely on childSrc for frames/workers
@@ -104,6 +105,7 @@ app.use(helmet({
                 'https://accounts.google.com',
                 'https://apis.google.com',
                 'https://*.firebaseapp.com',
+                'https://*.googleusercontent.com',
                 ...extraFrameDomains,
             ],
             // Forms (in case any direct POST to Cloudinary is used)
