@@ -46,22 +46,32 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
-// CORS for dev frontends (5173/5175) and optional FRONTEND_URL env
+// CORS
+// Allow local dev frontends, optional FRONTEND_URL, and Render external URL in production
 const allowedOrigins = [
     process.env.FRONTEND_URL,
+    process.env.FRONTEND_URLS, // optional comma-separated
+    process.env.RENDER_EXTERNAL_URL, // e.g., https://your-service.onrender.com
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:5175',
     'http://127.0.0.1:5175',
-].filter(Boolean);
-app.use(cors({
+]
+    .filter(Boolean)
+    .flatMap(o => (typeof o === 'string' ? o.split(',').map(s => s.trim()).filter(Boolean) : []));
+
+const corsApiOptions = {
     origin: (origin, callback) => {
-        // allow no-origin (like curl or same-origin proxy) and allowed list
+        // allow no-origin (curl, same-origin navigations) and explicit allow-list
         if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
         return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-}));
+};
+
+// Apply CORS only to API routes (avoid blocking static assets)
+app.use('/api', cors(corsApiOptions));
+app.options('/api/*', cors(corsApiOptions));
 
 // Static file serving for uploads
 import { fileURLToPath as __f } from 'url';
@@ -84,6 +94,8 @@ app.use('/api', commentsRoutes);
 
 // Serve built frontend from api/public and SPA fallback for non-API routes
 const publicDir = path.resolve(__dirname2, './public');
+// Allow public assets to be fetched cross-origin (useful if HTML is hosted elsewhere)
+app.use('/assets', cors({ origin: true, credentials: false }), express.static(path.join(publicDir, 'assets')));
 app.use(express.static(publicDir));
 app.get('*', (req, res, next) => {
     // Don't hijack API routes
