@@ -8,7 +8,7 @@ export default defineConfig({
     
     proxy: {
       '/api':{
-      target: 'http://localhost:7000',
+      target: 'https://aniketsblog-lgrb.onrender.com',
       changeOrigin: true,   
       secure: false,
       },
