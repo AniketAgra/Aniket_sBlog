@@ -45,7 +45,49 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(helmet());
+// Configure Helmet with CSP tuned for our app
+const parseList = (val) => (val ? String(val).split(',').map(s => s.trim()).filter(Boolean) : []);
+const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
+const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
+app.use(helmet({
+    // Allow loading cross-origin assets like images
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            // Default only from self
+            defaultSrc: ["'self'"],
+            // Allow styles from self and inline styles (used by many UI libs)
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            // Scripts from self (our bundled JS)
+            scriptSrc: ["'self'"],
+            // Images from self, data URIs, blobs, and selected trusted hosts
+            imgSrc: [
+                "'self'",
+                'data:',
+                'blob:',
+                'https://imgs.search.brave.com',
+                'https://via.placeholder.com',
+                'https://res.cloudinary.com',
+                ...extraImgDomains,
+            ],
+            // XHR/fetch targets: self and Cloudinary API (for uploads)
+            connectSrc: [
+                "'self'",
+                'https://api.cloudinary.com',
+                ...extraConnectDomains,
+            ],
+            // Forms (in case any direct POST to Cloudinary is used)
+            formAction: ["'self'", 'https://api.cloudinary.com'],
+            // Workers and media if blobs are used
+            workerSrc: ["'self'", 'blob:'],
+            mediaSrc: ["'self'", 'blob:'],
+            // Allow preloading fonts/images
+            objectSrc: ["'none'"],
+            frameAncestors: ["'self'"],
+        },
+    },
+}));
 // CORS
 // Allow local dev frontends, optional FRONTEND_URL, and Render external URL in production
 const allowedOrigins = [
