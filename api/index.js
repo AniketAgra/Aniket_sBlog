@@ -82,6 +82,15 @@ app.use('/api', resumeRoutes);
 app.use('/api', newsletterRoutes);
 app.use('/api', commentsRoutes);
 
+// Serve built frontend from api/public and SPA fallback for non-API routes
+const publicDir = path.resolve(__dirname2, './public');
+app.use(express.static(publicDir));
+app.get('*', (req, res, next) => {
+    // Don't hijack API routes
+    if (req.path.startsWith('/api')) return next();
+    return res.sendFile(path.join(publicDir, 'index.html'));
+});
+
 // Explicit endpoints to ensure availability (keeps same paths)
 app.post('/api/subscribe', apiRateLimiter, subscribeController);
 app.get('/api/subscribe/verify', verifySubscriptionController);

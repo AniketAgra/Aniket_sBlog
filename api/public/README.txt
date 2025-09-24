@@ -1,0 +1,1 @@
+Do NOT place resume.pdf here anymore. The resume is now served securely from the server under api/static/resume.pdf via a protected endpoint /api/resume/download that requires login. Put your file at api/static/resume.pdf.
