@@ -85,14 +85,8 @@ app.use(helmet({
                 'https://identitytoolkit.googleapis.com',
                 ...extraConnectDomains,
             ],
-            // Allow Google/Firebase auth frames/popups (Firebase Hosted UI)
-            frameSrc: [
-                "'self'",
-                'https://accounts.google.com',
-                'https://apis.google.com',
-                'https://*.firebaseapp.com',
-                'https://*.web.app',
-            ],
+            // Allow Google auth frames/popups
+            frameSrc: ["'self'", 'https://accounts.google.com', 'https://apis.google.com'],
             // Forms (in case any direct POST to Cloudinary is used)
             formAction: ["'self'", 'https://api.cloudinary.com'],
             // Workers and media if blobs are used
