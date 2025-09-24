@@ -248,7 +248,7 @@ function CommentNode({ node, derivedUsername, depth = 0, replyingTo, currentUser
         </form>
       )}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '.35rem' }}>
+  <div className={styles.actionsRow}>
         <button
           type="button"
           onClick={onToggleLike}
@@ -308,7 +308,7 @@ function CommentNode({ node, derivedUsername, depth = 0, replyingTo, currentUser
 
       {showReplyBox && (
         <form onSubmit={submitReply} style={{ marginTop: '.5rem' }}>
-          <div style={{ display: 'flex', gap: '.5rem' }}>
+          <div className={styles.formRow}>
             <input
               type="text"
               placeholder={`Reply as ${derivedUsername}`}
@@ -507,7 +507,7 @@ export default function CommentsList({ entityKey, entityType = 'post' }) {
 
       {/* Add comment form */}
       <form onSubmit={submit} style={{ marginBottom: '.75rem' }}>
-        <div style={{ display: 'flex', gap: '.5rem', marginBottom: '.5rem' }}>
+        <div className={styles.formRow} style={{ marginBottom: '.5rem' }}>
           <input
             type="text"
             placeholder="Write a comment…"

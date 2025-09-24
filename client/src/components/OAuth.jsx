@@ -41,7 +41,7 @@ export default function OAuth() {
         }
     }
   return (
-    <Button className="border bg-none text-gray-900 border-x-orange-500 border-y-pink-500 hover:text-white hover:border-transparent hover:bg-gradient-to-br hover:from-pink-500 hover:to-orange-500 rounded-md"
+    <Button className="border bg-none bg-transparent !border-x-orange-500 !border-y-pink-500 text-pink-200 hover:text-white hover:border-transparent hover:bg-gradient-to-br hover:from-pink-500 hover:to-orange-500 rounded-md"
 onClick={handleGoogleClick}>
         <AiFillGoogleCircle className="w-6 h-6 mr-2"/>
         Continue with Google

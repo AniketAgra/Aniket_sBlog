@@ -26,3 +26,35 @@
 .likeBtn:hover { background: rgba(255,255,255,.06); }
 .heartActive { color: #ef4444; } /* red when liked */
 .likeCount { color: #e5e7eb; font-size: .9rem; }
+
+/* Shared small button (used for Post/Reply in inline forms) */
+.button {
+	background: linear-gradient(90deg, #6366f1, #a78bfa 40%, #ec4899 98%);
+	color: #fff;
+	border: none;
+	border-radius: .5rem;
+	padding: .45rem .8rem;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: 0 6px 16px rgba(236,72,153,0.15), 0 0 0 1px rgba(167,139,250,0.15) inset;
+}
+.button:hover { filter: saturate(1.05); }
+
+/* Layout helpers for actions + inline forms */
+.actionsRow {
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+	margin-top: .35rem;
+	flex-wrap: wrap; /* allow wrapping on small screens */
+}
+.formRow {
+	display: flex;
+	gap: .5rem;
+}
+
+@media (max-width: 640px) {
+	.actionsRow { justify-content: space-between; row-gap: .4rem; }
+	.formRow { flex-direction: column; align-items: stretch; }
+	.formRow .button { width: 100%; }
+}

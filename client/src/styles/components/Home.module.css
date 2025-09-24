@@ -189,6 +189,33 @@
   fill: none;
 }
 
+/* Mobile responsiveness for Featured (Most Liked) card */
+@media (max-width: 639.98px) {
+  .projectFeature {
+    flex-direction: column;          /* stack image on top of content */
+    gap: 0;                          /* remove inner gap on mobile */
+  }
+  .projectFeatureMedia {
+    flex: 0 0 auto;                  /* allow natural sizing */
+    width: 100%;
+    margin: 0;                       /* flush edges inside card */
+    height: auto;
+    aspect-ratio: 16 / 9;            /* keep a nice cover aspect */
+    border-radius: 0;                /* inherit from card */
+  }
+  .projectFeatureBody {
+    padding: 0.85rem 0.95rem 1rem;   /* comfortable mobile paddings */
+  }
+  .badgeMostLiked {
+    top: 10px;
+    right: 10px;
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+  .badgeIcon { width: 14px; height: 14px; }
+  .tileDesc1 { margin-top: 1rem; color: #cbd5e1; font-size: .875rem; line-height: 1.4; }
+}
+
 /* Right: stacked list of remaining top 3 */
 .projectList { display: flex; flex-direction: column; gap: 1rem; }
 

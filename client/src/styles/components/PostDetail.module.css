@@ -1,8 +1,16 @@
 .container {
   max-width: 900px;
-  margin: 0 auto;
-  padding: 1.25rem 0.9rem 3rem;
+  margin: 1.25rem auto 0;
+  padding: 1.25rem 0.9rem 4.5rem;
   color: #e5e7eb; /* gray-200 */
+  position: relative; /* allow gradient backdrop */
+  /* Subtle on-theme page gradient (violet ➜ fuchsia ➜ cyan highlights) */
+  background:
+    radial-gradient(600px 260px at 15% -5%, rgba(168, 85, 247, 0.14), rgba(168, 85, 247, 0) 60%),
+    radial-gradient(700px 280px at 85% 0%, rgba(236, 72, 153, 0.12), rgba(236, 72, 153, 0) 60%),
+    radial-gradient(420px 220px at -10% 35%, rgba(59, 130, 246, 0.10), rgba(59, 130, 246, 0) 60%);
+  background-attachment: local;
+  border-radius: 18px; /* soften edges to blend with theme */
 }
 
 .breadcrumbs {
@@ -90,6 +98,12 @@
   gap: .75rem;
   flex-wrap: wrap; /* stack buttons if needed */
 }
+/* Right-aligned cluster for footer actions */
+.footerActionsRight {
+  display: inline-flex;
+  gap: .5rem;
+  margin-left: auto; /* push to the right */
+}
 .actionBar {
   margin-top: 1rem;
   padding: .6rem .75rem;
@@ -128,10 +142,44 @@
   border-radius: .5rem;
   font-weight: 600;
 }
-.button { background:#4f46e5; color:#fff; }
-.button:hover { background:#4338ca; }
-.buttonSecondary { background:#111827; color:#e5e7eb; border:1px solid rgba(255,255,255,.08); }
-.buttonSecondary:hover { background:#0b1220; }
+/* Primary pill — on-theme gradient */
+.button {
+  color:#fff;
+  background: linear-gradient(90deg, #6366f1, #a78bfa 35%, #ec4899 95%);
+  box-shadow: 0 8px 20px rgba(236,72,153,0.15), 0 0 0 1px rgba(167,139,250,0.18) inset;
+}
+.button:hover {
+  filter: saturate(1.1);
+  transform: translateY(-0.5px);
+}
+/* Subtle glassy secondary */
+.buttonSecondary {
+  background: rgba(255,255,255,.04);
+  color:#e5e7eb;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.buttonSecondary:hover { background: rgba(255,255,255,.06); }
+
+/* Back button — tidy, subtle, with icon spacing */
+.buttonBack {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .52rem .85rem;
+  border-radius: 999px;
+  color: #c7d2fe; /* indigo-200 */
+  background: rgba(17,24,39,.6);
+  border: 1px solid rgba(167,139,250,.28);
+  text-decoration: none;
+  transition: background .15s ease, transform .15s ease, border-color .2s ease;
+  box-shadow: 0 4px 16px rgba(99,102,241,.12) inset, 0 2px 10px rgba(0,0,0,.25);
+}
+.buttonBack:hover {
+  background: rgba(17,24,39,.75);
+  border-color: rgba(167,139,250,.42);
+  transform: translateY(-0.5px);
+}
 
 .centerBox {
   min-height: 60vh;
@@ -145,7 +193,49 @@
 @media (max-width: 640px) {
   .title { font-size: 1.75rem; }
   .metaRow { flex-direction: column; align-items: flex-start; gap: .5rem; }
-  .actionBar { flex-direction: column; align-items: stretch; }
-  .actionLeft, .actionRight { width: 100%; justify-content: space-between; }
-  .footerBar { justify-content: stretch; }
+  /* Action bar beneath the image */
+  .actionBar {
+    flex-direction: row;           /* keep in one row when possible */
+    align-items: center;
+    flex-wrap: wrap;               /* wrap gracefully if too tight */
+    gap: .6rem;
+    padding: .5rem .6rem;          /* slightly tighter on mobile */
+  }
+  .actionLeft {
+    width: auto;                   /* shrink to content */
+    justify-content: flex-start;   /* group icons together */
+    gap: .9rem;
+  }
+  .actionRight {
+    width: auto;
+    margin-left: auto;             /* push share to the right */
+    justify-content: flex-end;
+  }
+  .shareLabel { display: none; }   /* icon-only on small screens */
+
+  /* Footer CTA row — stack cleanly on small screens */
+  .footerBar {
+    flex-direction: column;         /* stack rows */
+    align-items: stretch;           /* make children fill width */
+    gap: .5rem;                     /* tighten spacing */
+  }
+  .buttonBack {
+    /* Make the primary back button feel native and avoid cramped wraps */
+    display: flex;                  /* allow width to apply on inline buttons */
+    width: 100%;                    /* full-bleed button */
+    justify-content: center;        /* center text/icon */
+  }
+  .footerActionsRight {
+    margin-left: 0;                 /* reset right-push */
+    width: 100%;
+    display: grid;                  /* two-up layout that wraps nicely */
+    grid-template-columns: 1fr 1fr; /* View Demo | View Repo */
+    gap: .5rem;
+    justify-content: flex-start;    /* valid value; avoid invalid 'stretch' */
+  }
+  .footerActionsRight .buttonBack {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
 }

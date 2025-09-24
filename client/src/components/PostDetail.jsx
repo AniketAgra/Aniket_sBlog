@@ -286,7 +286,10 @@ export default function PostDetail() {
   <CommentsList entityType="post" entityKey={typeof id === 'string' && id.length ? id : (slug || String(post._id || ''))} />
 
       <footer className={styles.footerBar}>
-        <Link to="/posts" className={styles.buttonSecondary}>← Back to Articles</Link>
+        <Link to="/posts" className={styles.buttonBack}>
+          <span aria-hidden>←</span>
+          <span>Back to Articles</span>
+        </Link>
         {post.demoUrl && (
           <a href={post.demoUrl} target="_blank" rel="noreferrer" className={styles.button}>
             View Demo

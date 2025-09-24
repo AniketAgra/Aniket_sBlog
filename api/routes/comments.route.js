@@ -5,11 +5,11 @@ import { toggleLikeOnComment, createReply, getReplies, updateComment, deleteComm
 
 const router = express.Router();
 
-// Toggle like on a comment
-router.post('/comments/:id/like', authOptional, toggleLikeOnComment);
+// Toggle like on a comment (auth required)
+router.post('/comments/:id/like', authenticate, toggleLikeOnComment);
 
-// Create a reply under a comment
-router.post('/comments/:id/replies', authOptional, createReply);
+// Create a reply under a comment (auth required)
+router.post('/comments/:id/replies', authenticate, createReply);
 
 // List replies for a comment
 router.get('/comments/:id/replies', getReplies);

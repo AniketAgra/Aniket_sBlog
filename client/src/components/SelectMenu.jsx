@@ -71,7 +71,7 @@ export default function SelectMenu({ options, value, onChange, srLabel = 'Select
   const listboxId = useMemo(() => `sel-${Math.random().toString(36).slice(2, 8)}`, []);
 
   return (
-    <div ref={wrapRef} className={`relative ${className}`}>
+  <div ref={wrapRef} className={`relative z-20 ${className}`}>
       <span className="sr-only">{srLabel}</span>
       <button
         ref={btnRef}
@@ -86,7 +86,7 @@ export default function SelectMenu({ options, value, onChange, srLabel = 'Select
             setOpen(true);
           }
         }}
-        className="group inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-gray-200 shadow-sm transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
+  className="group inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-gray-200 shadow-sm transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
       >
         <span className="whitespace-nowrap">{selected?.label}</span>
         <svg className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -100,7 +100,7 @@ export default function SelectMenu({ options, value, onChange, srLabel = 'Select
           id={listboxId}
           ref={listRef}
           aria-activedescendant={`${listboxId}-opt-${highlight}`}
-          className="absolute right-0 z-30 mt-2 max-h-60 min-w-[10rem] overflow-auto rounded-lg border border-white/10 bg-[#0b0b10]/95 p-1 ring-1 ring-black/0 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-[#0b0b10]/70"
+          className="absolute right-0 z-50 mt-2 max-h-60 min-w-[10rem] overflow-auto rounded-lg border border-white/10 bg-[#0b0b10]/95 p-1 ring-1 ring-black/0 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-[#0b0b10]/70"
         >
           {options.map((opt, i) => {
             const active = i === highlight;

@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types';
 import { useMemo, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from '../styles/components/ProjectCard.module.css';
+// Prompt is shown by parent Projects page; this component signals via onRequireAuth
 
-export default function ProjectCard({ project, variant = 'grid' }) {
+export default function ProjectCard({ project, variant = 'grid', onRequireAuth }) {
+  const currentUser = useSelector((s) => s.user?.currentUser);
   // Like state persisted per project
   const storageKey = useMemo(() => {
     const id = project?._id || project?.slug || project?.title || 'unknown';
@@ -11,26 +14,59 @@ export default function ProjectCard({ project, variant = 'grid' }) {
   }, [project?._id, project?.slug, project?.title]);
 
   const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(typeof project?.likes === 'number' ? Number(project.likes) : 0);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
+    if (!currentUser) { setLiked(false); setLikes(0); return; }
     try {
       const v = localStorage.getItem(storageKey);
       setLiked(v === '1');
     } catch {
       /* ignore */
     }
-  }, [storageKey]);
+  }, [storageKey, currentUser]);
 
-  const toggleLike = () => {
-    setLiked((prev) => {
-      const next = !prev;
+  // Fetch live counters (likes) to reflect DB state on cards
+  useEffect(() => {
+    let active = true;
+    const id = project?._id || project?.slug;
+    if (!id || !currentUser) return () => { active = false; };
+  (async () => {
       try {
-        if (next) localStorage.setItem(storageKey, '1');
+        const res = await fetch(`/api/projects/${encodeURIComponent(id)}/counters`, { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) return;
+        if (!active) return;
+    if (typeof data?.likes === 'number') setLikes(Number(data.likes));
+    if (typeof data?.liked === 'boolean') setLiked(!!data.liked);
+      } catch (_) { /* silent */ }
+    })();
+    return () => { active = false; };
+  }, [project?._id, project?.slug, currentUser]);
+
+  const toggleLike = async () => {
+    if (!currentUser) { onRequireAuth?.(); return; }
+    if (!project?._id || busy) return;
+    const next = !liked;
+    setLiked(next);
+    setLikes((n) => n + (next ? 1 : -1));
+    try {
+      setBusy(true);
+      const res = await fetch(`/api/projects/${encodeURIComponent(project._id)}/like`, { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || data?.message || 'Failed to like');
+      try {
+        if (data?.liked) localStorage.setItem(storageKey, '1');
         else localStorage.removeItem(storageKey);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+      } catch { /* ignore */ }
+      if (typeof data?.liked === 'boolean') setLiked(!!data.liked);
+      if (typeof data?.likes === 'number') setLikes(Number(data.likes));
+    } catch (_) {
+      setLiked((v) => !v);
+      setLikes((n) => n + (next ? -1 : 1));
+    } finally {
+      setBusy(false);
+    }
   };
   // Helper to truncate long descriptions with an ellipsis
   const truncate = (text, limit = 100) => {
@@ -71,8 +107,9 @@ export default function ProjectCard({ project, variant = 'grid' }) {
                 aria-pressed={liked}
                 aria-label={liked ? 'Unlike project' : 'Like project'}
                 onClick={toggleLike}
+                disabled={busy}
                 className={styles.likeBtn}
-                title={liked ? 'Unlike' : 'Like'}
+                title={currentUser ? `${liked ? 'Unlike' : 'Like'} • ${Number(likes) || 0} likes` : 'Sign in to like'}
               >
                 <svg
                   className={styles.likeIcon}
@@ -161,7 +198,9 @@ export default function ProjectCard({ project, variant = 'grid' }) {
           aria-pressed={liked}
           aria-label={liked ? 'Unlike project' : 'Like project'}
           onClick={toggleLike}
+          disabled={busy}
           className={`${styles.likeBtn} ${styles.tagGradient}`}
+          title={currentUser ? `${liked ? 'Unlike' : 'Like'} • ${Number(likes) || 0} likes` : 'Sign in to like'}
         >
           <svg
             className={styles.likeIcon}
@@ -203,7 +242,7 @@ export default function ProjectCard({ project, variant = 'grid' }) {
             </a>
           )}
         </div>
-      </div>
+  </div>
     </article>
   );
 }
@@ -214,6 +253,7 @@ ProjectCard.propTypes = {
     slug: PropTypes.string,
     title: PropTypes.string.isRequired,
     tagline: PropTypes.string,
+  likes: PropTypes.number,
     coverImageUrl: PropTypes.string,
     createdAt: PropTypes.string,
     languages: PropTypes.arrayOf(PropTypes.string),
@@ -222,4 +262,5 @@ ProjectCard.propTypes = {
     repoUrl: PropTypes.string,
   }).isRequired,
   variant: PropTypes.oneOf(['grid', 'list']),
+  onRequireAuth: PropTypes.func,
 };

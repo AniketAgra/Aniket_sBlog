@@ -51,23 +51,25 @@
   border: 1px solid rgba(255,255,255,.1);
   box-shadow: 0 10px 30px rgba(0,0,0,.15);
   border-radius: 1rem;
+  /* padding-left: 3rem !important; */
 }
 
 .timeline {
   position: relative;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding-left: 1rem; /* extra gutter for mobile line */
+  padding-right: 0.75rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
 .timelineLine {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Mobile-first: line on the left */
+  left: 1.5rem; /* 24px from left edge */
+  transform: none;
   width: 2px;
   height: 100%;
-  background: linear-gradient(180deg, rgba(139,92,246,.25), rgba(59,130,246,.25));
+  background: linear-gradient(180deg, rgba(139,92,246,.22), rgba(59,130,246,.22));
 }
 
 .iconHalo {
@@ -78,9 +80,30 @@
   position: absolute;
   inset: -6px;
   border-radius: 9999px;
-  background: radial-gradient(rgba(99,102,241,.35), rgba(99,102,241,0) 70%);
-  filter: blur(2px);
+  background: radial-gradient(rgba(99,102,241,.28), rgba(99,102,241,0) 70%);
+  filter: blur(3px);
   z-index: -1;
+}
+
+/* Force icon wrapper to align left on mobile and center on md+ */
+.iconPos {
+  position: absolute;
+  left: 1.5rem; /* same as timeline line offset */
+  top: 50%;
+  transform: translateY(-50%);
+}
+@media (min-width: 768px) {
+  .iconPos {
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .iconPos {
+    left: 1% !important;
+    transform: translate(-50%, -50%) !important;
+  }
 }
 
 /* Uniform card used on both sides of the timeline on md+ */
@@ -89,6 +112,7 @@
   max-width: 480px;
   width: 100%;
   padding: 1.25rem; /* 5 */
+  padding-left: 3rem;
   border-radius: 0.75rem;
   /* Neutral margins; spacing controlled per-side on md+ */
   margin-right: 0;
@@ -100,13 +124,39 @@
   gap: 0.25rem;
 }
 
+@media (max-width: 767px) {
+  /* On mobile, cards are full width and stacked */
+  .timelineCard {
+    margin-bottom: 1.5rem;
+    /* padding-left: 3rem !important; */
+  }
+  .glass{
+    padding-left: 3rem !important;
+  }
+}
+
 @media (min-width: 768px) {
+  /* Center the line on md+ */
+  .timelineLine {
+    left: 50%;
+    transform: translateX(-50%);
+  }
   /* On md+, pull cards slightly inward toward center line */
   .timelineCardLeft { /* left column */
-    margin-right: 8px;
+    margin-right: 16px; /* add breathing room from center line */
   }
   .timelineCardRight { /* right column */
-    margin-left: 8px;
+    margin-left: 16px; /* add breathing room from center line */
+  }
+}
+
+@media (min-width: 1024px) {
+  /* On lg+, increase the offset a bit more for large screens */
+  .timelineCardLeft { /* left column */
+    margin-right: 24px;
+  }
+  .timelineCardRight { /* right column */
+    margin-left: 24px;
   }
 }
 

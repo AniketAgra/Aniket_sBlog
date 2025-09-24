@@ -16,6 +16,18 @@ export const signup = async (req, res, next) => {
         const newUser = await User.create({ username, name: name || username, email, password: hashedPassword, passwordHash: hashedPassword, role: 'user' });
         res.status(200).json({ user: newUser._id });
     } catch (error) {
+        // Handle duplicate key errors gracefully
+        if (error && (error.code === 11000 || /duplicate key/i.test(error?.message))) {
+            const field = Object.keys(error.keyPattern || {})[0];
+            const isEmail = /email/i.test(field || '') || /email/i.test(error?.message || '');
+            const isUsername = /username/i.test(field || '') || /username/i.test(error?.message || '');
+            const message = isEmail
+                ? 'Email already in use'
+                : isUsername
+                    ? 'Username already in use'
+                    : 'Account already exists with provided details';
+            return next(errorHandler(409, message));
+        }
         next(error);
     }
 };

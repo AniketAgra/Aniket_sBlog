@@ -218,13 +218,18 @@ export default function ProjectDetail() {
   <CommentsList entityType="project" entityKey={typeof id === 'string' && id.length ? id : (slug || String(p._id || ''))} />
 
       <footer className={styles.footerBar}>
-        <Link to="/projects" className={styles.buttonSecondary}>← Back to Projects</Link>
-        {p.demoUrl && (
-          <a href={p.demoUrl} target="_blank" rel="noreferrer" className={styles.button}>View Demo</a>
-        )}
-        {p.repoUrl && (
-          <a href={p.repoUrl} target="_blank" rel="noreferrer" className={styles.button}>View Repo</a>
-        )}
+        <Link to="/projects" className={styles.buttonBack}>
+          <span aria-hidden>←</span>
+          <span>Back to Projects</span>
+        </Link>
+        <div className={styles.footerActionsRight}>
+          {p.demoUrl && (
+            <a href={p.demoUrl} target="_blank" rel="noreferrer" className={styles.buttonBack}>View Demo</a>
+          )}
+          {p.repoUrl && (
+            <a href={p.repoUrl} target="_blank" rel="noreferrer" className={styles.buttonBack}>View Repo</a>
+          )}
+        </div>
       </footer>
     </article>
   );

@@ -7,7 +7,8 @@ import OAuth from "../src/components/OAuth";
 
 const Signin = () => {
     const [formData, setFormData] = useState({});
-    const {loading, errorMessage} = useSelector(state => state.user);  //state - global value
+    // Use the correct slice fields: loading, error
+    const { loading, error } = useSelector(state => state.user);  //state - global value
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const handleChange = (e) => {
@@ -29,7 +30,16 @@ const Signin = () => {
             const data = await res.json();
             
             if(!res.ok || data?.success === false){
-                const msg = data?.error?.message || data?.message || 'Login failed';
+                // Normalize common auth errors to a user-friendly message
+                const raw = data?.error?.message || data?.message || '';
+                let msg = raw || 'Login failed';
+                if (res.status === 400 || res.status === 401 || res.status === 404) {
+                    msg = 'Wrong email or password';
+                }
+                // Fallback if backend used a generic invalid credentials message
+                if (/invalid\s+username\s+or\s+password/i.test(raw)) {
+                    msg = 'Wrong email or password';
+                }
                 return dispatch(signInFail(msg));
             }
 
@@ -38,14 +48,14 @@ const Signin = () => {
                 navigate('/');
             }
         } catch (error) {
-            dispatch(signInFail(error.message));
+            dispatch(signInFail(error.message || 'Network error while signing in'));
         }
     }
     return (
-        <div className="min-h-screen mt-10 md:mt-20 flex items-center justify-center " style={{ width: '100vw', height: '80vh' }}>
-            <div className="flex flex-col md:flex-row max-w-4xl w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-5 gap-5 items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center px-4">
+            <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
                 {/* Left */}
-                <div className="flex-1 flex flex-col items-start md:items-start">
+                <div className="p-8 md:p-10 flex flex-col justify-center">
                     <Link
                         to="/"
                         className="font-bold dark:text-white text-4xl text-center md:text-left"
@@ -53,33 +63,31 @@ const Signin = () => {
                         <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
                             Aniket&apos;s
                         </span>
-                        Blog
+                        {' '}Blog
                     </Link>
-                    <p className="text-sm mt-5 text-gray-700 dark:text-gray-300  md:text-left">
+                    <p className="text-sm mt-5 text-gray-700 dark:text-gray-300 text-center md:text-left">
                         Hello! You may sign in with your email and password or with Google.
                     </p>
                 </div>
 
                 {/* Right */}
-                <div className="flex-1">
+                <div className="p-8 md:p-10 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700">
                     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                         <div>
                             <Label htmlFor="email" value="Your Email" />
-                            <TextInput type="email" placeholder="name123@company.com" id="email"  onChange={handleChange}/>
+                            <TextInput type="email" placeholder="name123@company.com" id="email" onChange={handleChange} />
                         </div>
                         <div>
                             <Label htmlFor="password" value="Your Password" />
-                            <TextInput type="password" placeholder="Password" id="password" onChange={handleChange}/>
+                            <TextInput type="password" placeholder="Password" id="password" onChange={handleChange} />
                         </div>
                         <Button gradientDuoTone="purpleToPink" type="submit" disabled={loading}>
-                            {
-                                loading ? (
-                                    <>
-                                        <Spinner size='sm'/>
-                                        <span className="pl-3">Loading...</span>
-                                    </>
-                                ) : 'Sign In'
-                            }
+                            {loading ? (
+                                <>
+                                    <Spinner size='sm' />
+                                    <span className="pl-3">Loading...</span>
+                                </>
+                            ) : 'Sign In'}
                         </Button>
                         <OAuth />
                     </form>
@@ -89,12 +97,11 @@ const Signin = () => {
                             Sign up
                         </Link>
                     </div>
-                    {errorMessage && (
-                            <Alert className="mt-5" color='failure'>
-                                {errorMessage}
-                            </Alert>
-                        )
-                    }
+                    {error && (
+                        <Alert className="mt-5" color='failure'>
+                            {error}
+                        </Alert>
+                    )}
                 </div>
             </div>
         </div>
