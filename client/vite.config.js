@@ -5,12 +5,11 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
   server: {
     port: 5175,
-    
     proxy: {
-      '/api':{
-      target: 'https://aniketsblog-lgrb.onrender.com',
-      changeOrigin: true,   
-      secure: false,
+      '/api': {
+        target: 'http://localhost:7000',
+        changeOrigin: true,
+        secure: false,
       },
     },
   },
