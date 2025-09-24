@@ -24,7 +24,7 @@ export default function ProjectsFilterBar({
   onClear,
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+  <div className="flex flex-col gap-3">
       <div className="flex flex-1 items-center gap-2">
         <div className="relative flex-1">
           {/* Single gradient border without inner ring to avoid double outline */}
@@ -63,13 +63,13 @@ export default function ProjectsFilterBar({
             </div>
           </div>
         </div>
-        <SelectMenu options={sortOptions} value={sort} onChange={onSort} className="min-w-[9rem]" />
-        <div className="hidden items-center gap-1 sm:flex">
+  <SelectMenu options={sortOptions} value={sort} onChange={onSort} className="min-w-[9rem]" />
+    <div className="hidden items-center gap-2 sm:flex">
           <button
             type="button"
             title="Grid view"
             onClick={() => onView('grid')}
-            className={`rounded-md p-2 text-gray-300 hover:bg-white/5 ${view === 'grid' ? 'bg-white/10 text-white' : ''}`}
+      className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-black/30 text-gray-300 transition-colors hover:bg-white/5 ${view === 'grid' ? 'bg-white/10 text-white' : ''}`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 8v-8h8v8h-8z"/></svg>
           </button>
@@ -77,7 +77,7 @@ export default function ProjectsFilterBar({
             type="button"
             title="List view"
             onClick={() => onView('list')}
-            className={`rounded-md p-2 text-gray-300 hover:bg-white/5 ${view === 'list' ? 'bg-white/10 text-white' : ''}`}
+      className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-black/30 text-gray-300 transition-colors hover:bg-white/5 ${view === 'list' ? 'bg-white/10 text-white' : ''}`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
           </button>
@@ -85,7 +85,7 @@ export default function ProjectsFilterBar({
       </div>
 
       {(facets?.tags?.length || facets?.languages?.length) && (
-        <div className="-mx-1 mt-1 flex flex-wrap gap-2 sm:mx-0 sm:mt-0">
+        <div className="-mx-1 mt-3 mb-[-15px]  flex flex-wrap gap-2 sm:mx-0">
           {facets.languages?.slice(0, 10).map((l) => {
             const active = activeLanguages.includes(l.value);
             return (

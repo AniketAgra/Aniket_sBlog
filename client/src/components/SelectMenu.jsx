@@ -86,7 +86,7 @@ export default function SelectMenu({ options, value, onChange, srLabel = 'Select
             setOpen(true);
           }
         }}
-        className="group inline-flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-gray-200 shadow-sm transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
+        className="group inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-gray-200 shadow-sm transition-colors hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40"
       >
         <span className="whitespace-nowrap">{selected?.label}</span>
         <svg className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

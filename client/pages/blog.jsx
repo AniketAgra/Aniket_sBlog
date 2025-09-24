@@ -5,7 +5,7 @@ import styles from '../src/styles/components/Blog.module.css';
 
 export default function Blog() {
   const [state, setState] = useState({ items: [], loading: true, error: null });
-  const [filters, setFilters] = useState({ q: '', category: 'all' });
+  const [filters, setFilters] = useState({ q: '', category: 'all', sort: 'newest' });
   const [showPrompt, setShowPrompt] = useState(false);
   const currentUser = useSelector((s) => s.user?.currentUser);
 
@@ -65,14 +65,38 @@ export default function Blog() {
 
       return true;
     });
-  }, [state.items, filters]);
+  }, [state.items, filters.q, filters.category]);
+
+  // Apply sorting based on selected sort option
+  const sortedItems = useMemo(() => {
+    const arr = [...filteredItems];
+    const s = String(filters.sort || 'newest');
+    const byDate = (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    const byDateAsc = (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    const byTitle = (a, b) => String(a.title || '').localeCompare(String(b.title || ''), undefined, { sensitivity: 'base' });
+    const byTitleDesc = (a, b) => -byTitle(a, b);
+    const byLikes = (a, b) => (b.likes || 0) - (a.likes || 0);
+    switch (s) {
+      case 'oldest':
+        return arr.sort(byDateAsc);
+      case 'az':
+        return arr.sort(byTitle);
+      case 'za':
+        return arr.sort(byTitleDesc);
+      case 'liked':
+        return arr.sort(byLikes);
+      case 'newest':
+      default:
+        return arr.sort(byDate);
+    }
+  }, [filteredItems, filters.sort]);
 
   return (
     <div className={styles.blogContainer}>
       <div className={styles.contentWrapper}>
-        <div className={styles.header}>
+        <header className={styles.header}>
           <div className={styles.headerContent}>
-            <h1 className={styles.title}>
+            <h1 id="blog-heading" className={styles.title}>
               Latest Articles
             </h1>
             <p className={styles.description}>
@@ -80,50 +104,46 @@ export default function Blog() {
               technology.
             </p>
           </div>
-        </div>
+        </header>
 
-  {/* Category filter */}
-        <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
-          <BlogSearchFilter
-            value={filters}
-            onChange={setFilters}
-          />
+        <div className={styles.divider} aria-hidden="true" />
+
+        {/* Category filter */}
+        <div className={styles.filterBar}>
+          <BlogSearchFilter value={filters} onChange={setFilters} />
         </div>
 
         {state.loading && (
-          <div className={styles.loadingContainer}>
+          <div className={styles.loadingContainer} role="status" aria-live="polite">
+            <span className={styles.srOnly}>Loading posts</span>
             <div className={styles.loadingText}>Loading…</div>
           </div>
         )}
 
         {state.error && (
-          <div className={styles.errorContainer}>
+          <div className={styles.errorContainer} role="alert">
             <div className={styles.errorText}>{state.error}</div>
           </div>
         )}
 
+  {!state.loading && !state.error && sortedItems.length === 0 && (
+          <div className={styles.emptyState} role="status">No related posts found.</div>
+        )}
+
         {/* Grid of posts with gating for unauthenticated users */}
-        <div className={styles.grid}>
-          {(currentUser ? filteredItems : filteredItems.slice(0, 3)).map((post) => (
+        <section aria-labelledby="blog-heading" className={styles.grid}>
+          {(currentUser ? sortedItems : sortedItems.slice(0, 3)).map((post) => (
             <BlogCard key={post._id} post={post} />
           ))}
-        </div>
+        </section>
 
         {/* Show more button for logged-out users when there are more posts */}
         {!currentUser && filteredItems.length > 3 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+          <div className={styles.showMoreWrap}>
             <button
               type="button"
               onClick={() => setShowPrompt(true)}
-              style={{
-                background: '#111827',
-                color: 'white',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.375rem',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 600
-              }}
+              className={styles.showMoreBtn}
             >
               Show more
             </button>
@@ -134,7 +154,7 @@ export default function Blog() {
         {showPrompt && !currentUser && (
           <SignInPrompt onClose={() => setShowPrompt(false)} message="Create a free account or sign in to view all blog posts." />
         )}
-        
+
       </div>
     </div>
   );
