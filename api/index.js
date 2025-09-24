@@ -54,13 +54,15 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
         useDefaults: true,
-        directives: {
+    directives: {
             // Default only from self
             defaultSrc: ["'self'"],
             // Allow styles from self and inline styles (used by many UI libs)
             styleSrc: ["'self'", "'unsafe-inline'"],
-            // Scripts from self (our bundled JS)
-            scriptSrc: ["'self'"],
+            // Scripts from self + Google APIs (for OAuth widgets)
+            scriptSrc: ["'self'", 'https://apis.google.com'],
+            // Be explicit for element-level script policy too
+            scriptSrcElem: ["'self'", 'https://apis.google.com'],
             // Images from self, data URIs, blobs, and selected trusted hosts
             imgSrc: [
                 "'self'",
@@ -69,14 +71,22 @@ app.use(helmet({
                 'https://imgs.search.brave.com',
                 'https://via.placeholder.com',
                 'https://res.cloudinary.com',
+                'https://i.pravatar.cc',
+                'https://lh3.googleusercontent.com',
                 ...extraImgDomains,
             ],
-            // XHR/fetch targets: self and Cloudinary API (for uploads)
+            // XHR/fetch targets: self, Cloudinary API, and Firebase/Google auth endpoints
             connectSrc: [
                 "'self'",
                 'https://api.cloudinary.com',
+                'https://apis.google.com',
+                'https://www.googleapis.com',
+                'https://securetoken.googleapis.com',
+                'https://identitytoolkit.googleapis.com',
                 ...extraConnectDomains,
             ],
+            // Allow Google auth frames/popups
+            frameSrc: ["'self'", 'https://accounts.google.com', 'https://apis.google.com'],
             // Forms (in case any direct POST to Cloudinary is used)
             formAction: ["'self'", 'https://api.cloudinary.com'],
             // Workers and media if blobs are used
