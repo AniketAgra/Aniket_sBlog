@@ -49,6 +49,7 @@ app.use(cookieParser());
 const parseList = (val) => (val ? String(val).split(',').map(s => s.trim()).filter(Boolean) : []);
 const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
 const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
+const extraFrameDomains = parseList(process.env.ALLOWED_FRAME_DOMAINS);
 app.use(helmet({
     // Allow loading cross-origin assets like images
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -86,7 +87,22 @@ app.use(helmet({
                 ...extraConnectDomains,
             ],
             // Allow Google auth frames/popups
-            frameSrc: ["'self'", 'https://accounts.google.com', 'https://apis.google.com'],
+            frameSrc: [
+                "'self'",
+                'https://accounts.google.com',
+                'https://apis.google.com',
+                // Firebase Auth helper iframe lives on project .firebaseapp.com
+                'https://*.firebaseapp.com',
+                ...extraFrameDomains,
+            ],
+            // Older browsers still rely on childSrc for frames/workers
+            childSrc: [
+                "'self'",
+                'https://accounts.google.com',
+                'https://apis.google.com',
+                'https://*.firebaseapp.com',
+                ...extraFrameDomains,
+            ],
             // Forms (in case any direct POST to Cloudinary is used)
             formAction: ["'self'", 'https://api.cloudinary.com'],
             // Workers and media if blobs are used
