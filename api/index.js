@@ -59,10 +59,10 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             // Allow styles from self and inline styles (used by many UI libs)
             styleSrc: ["'self'", "'unsafe-inline'"],
-            // Scripts from self + Google APIs and accounts (for OAuth widgets)
-            scriptSrc: ["'self'", 'https://apis.google.com', 'https://accounts.google.com', 'https://www.gstatic.com'],
+            // Scripts from self + Google APIs (for OAuth widgets)
+            scriptSrc: ["'self'", 'https://apis.google.com'],
             // Be explicit for element-level script policy too
-            scriptSrcElem: ["'self'", 'https://apis.google.com', 'https://accounts.google.com', 'https://www.gstatic.com'],
+            scriptSrcElem: ["'self'", 'https://apis.google.com'],
             // Images from self, data URIs, blobs, and selected trusted hosts
             imgSrc: [
                 "'self'",
@@ -85,21 +85,13 @@ app.use(helmet({
                 'https://identitytoolkit.googleapis.com',
                 ...extraConnectDomains,
             ],
-            // Allow Google & Firebase auth frames/popups
+            // Allow Google/Firebase auth frames/popups (Firebase Hosted UI)
             frameSrc: [
                 "'self'",
                 'https://accounts.google.com',
                 'https://apis.google.com',
                 'https://*.firebaseapp.com',
-                'https://aniket-s-blog.firebaseapp.com'
-            ],
-            // For older CSP clients, child-src also governs frames/workers
-            childSrc: [
-                "'self'",
-                'https://accounts.google.com',
-                'https://apis.google.com',
-                'https://*.firebaseapp.com',
-                'https://aniket-s-blog.firebaseapp.com'
+                'https://*.web.app',
             ],
             // Forms (in case any direct POST to Cloudinary is used)
             formAction: ["'self'", 'https://api.cloudinary.com'],
