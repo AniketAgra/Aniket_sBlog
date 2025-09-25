@@ -51,6 +51,8 @@ const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
 const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
 const extraFrameDomains = parseList(process.env.ALLOWED_FRAME_DOMAINS);
 app.use(helmet({
+    // Allow OAuth popups/redirects to use window.opener without being blocked
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     // Allow loading cross-origin assets like images
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
