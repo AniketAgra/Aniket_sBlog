@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import { AiOutlineMenu, AiOutlineSearch } from 'react-icons/ai';
+import { AiOutlineMenu } from 'react-icons/ai';
 import styles from '../styles/components/HeaderCustom.module.css';
-import { toggleTheme } from '../redux/theme/themeSlice';
 import { signOut } from '../redux/user/userSlice';
 
 export default function HeaderCustom(){
@@ -15,8 +13,6 @@ export default function HeaderCustom(){
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentUser } = useSelector(s => s.user);
-  const { theme } = useSelector(s => s.theme);
-  const isAdmin = currentUser?.role === 'admin';
 
   const handleSignOut = async () => {
     try{
@@ -63,16 +59,6 @@ export default function HeaderCustom(){
         </nav>
 
         <div className={styles.controls}>
-          <form className={styles.searchForm} onSubmit={(e)=>e.preventDefault()}>
-            <input className={styles.searchInput} placeholder='Search...' />
-          </form>
-          <button className={`${styles.iconBtn} ${styles.searchIconBtn}`} aria-label='Search'>
-            <AiOutlineSearch />
-          </button>
-          <button className={styles.themeBtn} aria-label='Toggle theme' onClick={()=>dispatch(toggleTheme())}>
-            {theme === 'light' ? <FaSun/> : <FaMoon/>}
-          </button>
-
           {currentUser ? (
             <div className={styles.avatarWrap}>
               <button className={styles.avatarBtn} onClick={()=>setMenuOpen(v=>!v)} aria-haspopup='menu' aria-expanded={menuOpen}>
@@ -93,7 +79,7 @@ export default function HeaderCustom(){
             </Link>
           )}
 
-      <button className={styles.toggleBtn} aria-controls='mobile-nav' aria-expanded={open} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
+          <button className={styles.toggleBtn} aria-controls='mobile-nav' aria-expanded={open} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
             <AiOutlineMenu />
           </button>
         </div>
@@ -116,16 +102,6 @@ export default function HeaderCustom(){
         {currentUser && (
           <Link to='/dashboard?tab=profile' className={`${styles.navLink} ${styles.mobileOnly} ${path.startsWith('/dashboard') ? styles.active : ''}`}>Dashboard</Link>
         )}
-        {/* {isAdmin && (
-          <>
-            <Link to='/dashboard?tab=create-post' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Post</Link>
-            <Link to='/dashboard?tab=create-project' className={`${styles.navLink} ${styles.mobileOnly}`}>Create Project</Link>
-            <Link to='/dashboard?tab=manage-posts' className={`${styles.navLink} ${styles.mobileOnly}`}>Manage Posts</Link>
-            <Link to='/dashboard?tab=manage-projects' className={`${styles.navLink} ${styles.mobileOnly}`}>Manage Projects</Link>
-            <Link to='/dashboard?tab=subscribers' className={`${styles.navLink} ${styles.mobileOnly}`}>Subscribers</Link>
-            <Link to='/dashboard?tab=resume-downloads' className={`${styles.navLink} ${styles.mobileOnly}`}>Resume Downloads</Link>
-          </>
-        )} */}
       </div>
     </nav>
     </header>

@@ -126,22 +126,22 @@ export default function ResumeDownloadsPanel() {
       </div>
 
       {/* Table */}
-      <div className="mt-6 overflow-x-auto">
+      <div className="mt-6 overflow-x-auto custom-scrollbar rounded-xl ring-1 ring-white/10">
         <GlassCard className="p-0">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-white/5 text-left text-gray-300">
-                <th className="px-3 py-2">Username</th>
-                <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">IP</th>
-                <th className="px-3 py-2">User Agent</th>
-                <th className="px-3 py-2">Timestamp</th>
+          <table className="min-w-full text-sm relative">
+            <thead className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/10 bg-white/5">
+              <tr className="text-left text-gray-300/90">
+                <th className="px-3 py-2 font-medium tracking-wide">Username</th>
+                <th className="px-3 py-2 font-medium tracking-wide">Email</th>
+                <th className="px-3 py-2 font-medium tracking-wide">IP</th>
+                <th className="px-3 py-2 font-medium tracking-wide">User Agent</th>
+                <th className="px-3 py-2 font-medium tracking-wide">Timestamp</th>
               </tr>
             </thead>
             <tbody>
               {loading && Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
               {!loading && data.items.map((row) => (
-                <tr key={row._id} className="border-t border-white/10 hover:bg-white/5">
+                <tr key={row._id} className="border-t border-white/10 hover:bg-white/5 transition-colors">
                   <td className="px-3 py-3">{row.username || 'anonymous'}</td>
                   <td className="px-3 py-3">{row.email || '—'}</td>
                   <td className="px-3 py-3 font-mono text-xs">{row.ip || '—'}</td>

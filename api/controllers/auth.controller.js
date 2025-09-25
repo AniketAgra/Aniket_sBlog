@@ -2,6 +2,8 @@ import User from '../models/user.model.js';
 import bcryptjs from "bcryptjs";
 import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { sendEmail } from '../utils/email.js';
 
 export const signup = async (req, res, next) => {
     const { username, email, password, name } = req.body;
@@ -160,4 +162,42 @@ export const signout = async (req, res, next) => {
         } catch (error) {
                 next(error);
         }
+};
+
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) return next(errorHandler(400, 'Email is required'));
+        const user = await User.findOne({ email });
+        if (!user) return next(errorHandler(404, 'User not found'));
+
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const hashed = crypto.createHash('sha256').update(rawToken).digest('hex');
+        user.passwordResetToken = hashed;
+        user.passwordResetExpires = Date.now() + 1000 * 60 * 30; // 30 minutes
+        await user.save();
+
+        const baseUrl = process.env.CLIENT_URL || req.headers.origin || '';
+        const resetUrl = `${baseUrl.replace(/\/$/, '')}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+        const html = `<p>You requested a password reset.</p><p>Click the link below to reset your password. This link is valid for 30 minutes.</p><p><a href="${resetUrl}" target="_blank">Reset Password</a></p><p>If you did not request this, you can ignore this email.</p>`;
+        await sendEmail({ to: email, subject: 'Password Reset', html });
+        res.json({ message: 'Password reset email sent' });
+    } catch (err) { next(err); }
+};
+
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { token, email, password } = req.body;
+        if (!token || !email || !password) return next(errorHandler(400, 'All fields required'));
+        const hashed = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({ email, passwordResetToken: hashed, passwordResetExpires: { $gt: Date.now() } });
+        if (!user) return next(errorHandler(400, 'Token invalid or expired'));
+        const hashedPassword = bcryptjs.hashSync(password, 10);
+        user.password = hashedPassword;
+        user.passwordHash = hashedPassword;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+        res.json({ message: 'Password reset successful' });
+    } catch (err) { next(err); }
 };
