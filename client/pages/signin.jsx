@@ -80,6 +80,11 @@ const Signin = () => {
                         <div>
                             <Label htmlFor="password" value="Your Password" />
                             <TextInput type="password" placeholder="Password" id="password" onChange={handleChange} />
+                            <div className="text-right mt-1">
+                                <Link to="/forgot-password" className="text-xs text-indigo-500 hover:underline">
+                                    Forgot password?
+                                </Link>
+                            </div>
                         </div>
                         <Button gradientDuoTone="purpleToPink" type="submit" disabled={loading}>
                             {loading ? (

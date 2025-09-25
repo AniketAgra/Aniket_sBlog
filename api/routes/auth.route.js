@@ -11,8 +11,9 @@ router.post('/register', signup);
 router.post('/login', signin);
 router.post('/google', google)
 router.post('/signout', signout)
-// Password reset
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+
+router.post('/forgot-password', forgotPassword)
+router.post('/reset-password', resetPassword)
+
 
 export default router;

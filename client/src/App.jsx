@@ -6,6 +6,8 @@ import About from "../pages/about";
 import Signup from "../pages/signup";
 import Dashboard from "../pages/dashboard";
 import Signin from "../pages/signin";
+import ForgotPassword from "../pages/forgotPassword";
+import ResetPassword from "../pages/resetPassword";
 import Projects from "../pages/projects";
 import Blog from "../pages/blog";
 import PostPage from "../pages/post";
@@ -27,6 +29,8 @@ const app = () => {
             <Route path="/posts/:id" element={<PostPage/>} ></Route>
             <Route path="/signup" element={<Signup/>} ></Route>
             <Route path="/signin" element={<Signin/>} ></Route>
+            <Route path="/forgot-password" element={<ForgotPassword/>} ></Route>
+            <Route path="/reset-password" element={<ResetPassword/>} ></Route>
             <Route element={<PrivateRoute/>}>      
                 <Route path="/dashboard" element={<Dashboard/>} ></Route>
             </Route>

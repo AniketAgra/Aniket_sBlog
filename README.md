@@ -39,3 +39,16 @@ Other required vars:
 - Do not commit real secrets. `.env` is ignored by git.
 - Rotate any keys that may have been accidentally shared.
 
+### Password Reset Feature
+
+The auth system includes password reset via emailed link.
+
+1. User submits email at `/forgot-password`.
+2. Backend generates a token (30 min expiry) and emails `${CLIENT_URL}/reset-password?token=...&email=...`.
+3. User sets new password at that link.
+
+Environment variables:
+- `CLIENT_URL` – Base URL of the frontend (e.g. `http://localhost:5173` or production domain). If not set the server tries `req.headers.origin`.
+
+Ensure SMTP variables are configured (above) for real delivery. In dev without SMTP the email content is logged to the server console.
+
