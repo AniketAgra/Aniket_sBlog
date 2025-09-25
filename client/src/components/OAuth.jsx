@@ -13,11 +13,15 @@ export default function OAuth() {
     const navigate = useNavigate();
 
     const auth = getAuth(app);
-    // Try popup, fall back to redirect if blocked or closed
+    // Try popup locally; in production prefer redirect to avoid popup flakiness
     const handleGoogleClick = async () => {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         try {
+            if (import.meta.env.PROD) {
+                await signInWithRedirect(auth, provider);
+                return; // the page will navigate; further code won't run now
+            }
             const resultFromGoogle = await signInWithPopup(auth, provider);
             const response = await fetch('/api/auth/google',{
                 method: 'POST',
@@ -38,7 +42,7 @@ export default function OAuth() {
             } else {
                 console.error('Google auth failed', data);
             }
-        } catch (error) {
+    } catch (error) {
             // If popup blocked/closed, use redirect as a robust fallback
             if (error?.code === 'auth/popup-blocked' || error?.code === 'auth/popup-closed-by-user') {
                 try {

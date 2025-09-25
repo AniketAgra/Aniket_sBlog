@@ -8,7 +8,8 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "aniket-s-blog.firebaseapp.com",
   projectId: "aniket-s-blog",
-  storageBucket: "aniket-s-blog.firebasestorage.app",
+  // Firebase storage bucket uses the appspot.com domain
+  storageBucket: "aniket-s-blog.appspot.com",
   messagingSenderId: "67559833778",
   appId: "1:67559833778:web:3b42c250133459351149ab"
 };
