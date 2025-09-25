@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import { AiOutlineMenu, AiOutlineSearch } from 'react-icons/ai';
+import { AiOutlineMenu } from 'react-icons/ai';
 import styles from '../styles/components/HeaderCustom.module.css';
-import { toggleTheme } from '../redux/theme/themeSlice';
 import { signOut } from '../redux/user/userSlice';
 
 export default function HeaderCustom(){
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const avatarWrapRef = useRef(null);
   const sheetRef = useRef(null);
   const path = useLocation().pathname;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentUser } = useSelector(s => s.user);
-  const { theme } = useSelector(s => s.theme);
-  const isAdmin = currentUser?.role === 'admin';
+  
 
   const handleSignOut = async () => {
     try{
@@ -47,6 +45,23 @@ export default function HeaderCustom(){
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', keyHandler); };
   }, [open]);
 
+  // Close avatar menu on outside click or Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDocClick = (e) => {
+      if (!avatarWrapRef.current?.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('click', onDocClick, true);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocClick, true);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
   return (
     <header className={styles.root}>
       <div className={styles.container}>
@@ -63,19 +78,12 @@ export default function HeaderCustom(){
         </nav>
 
         <div className={styles.controls}>
-          <form className={styles.searchForm} onSubmit={(e)=>e.preventDefault()}>
-            <input className={styles.searchInput} placeholder='Search...' />
-          </form>
-          <button className={`${styles.iconBtn} ${styles.searchIconBtn}`} aria-label='Search'>
-            <AiOutlineSearch />
-          </button>
-          <button className={styles.themeBtn} aria-label='Toggle theme' onClick={()=>dispatch(toggleTheme())}>
-            {theme === 'light' ? <FaSun/> : <FaMoon/>}
-          </button>
+          {/* Search UI removed */}
+          {/* Theme toggle removed */}
 
           {currentUser ? (
-            <div className={styles.avatarWrap}>
-              <button className={styles.avatarBtn} onClick={()=>setMenuOpen(v=>!v)} aria-haspopup='menu' aria-expanded={menuOpen}>
+            <div className={styles.avatarWrap} ref={avatarWrapRef}>
+              <button type="button" className={styles.avatarBtn} onClick={()=>setMenuOpen(v=>!v)} aria-haspopup='menu' aria-expanded={menuOpen}>
                 <img className={styles.avatarImg} alt='user' src={currentUser.profilePicture} />
               </button>
               <div className={`${styles.menu} ${menuOpen ? styles.menuOpen : ''}`} role='menu'>
@@ -84,23 +92,23 @@ export default function HeaderCustom(){
                 <hr className={styles.menuDivider}/>
                 <Link to='/dashboard?tab=profile' className={styles.menuItem} onClick={()=>setMenuOpen(false)}>Profile</Link>
                 <hr className={styles.menuDivider}/>
-                <button className={styles.menuItem} onClick={handleSignOut}>Sign Out</button>
+                <button type="button" className={styles.menuItem} onClick={handleSignOut}>Sign Out</button>
               </div>
             </div>
           ) : (
             <Link to='/signin'>
-              <button className={styles.signInButton}>Sign In</button>
+              <button type="button" className={styles.signInButton}>Sign In</button>
             </Link>
           )}
 
-      <button className={styles.toggleBtn} aria-controls='mobile-nav' aria-expanded={open} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
+      <button type="button" className={styles.toggleBtn} aria-controls='mobile-nav' aria-expanded={open} aria-label='Toggle navigation' onClick={()=>setOpen(o=>!o)}>
             <AiOutlineMenu />
           </button>
         </div>
       </div>
 
     {/* Mobile overlay nav */}
-    {open && <button aria-hidden className={styles.backdrop} onClick={()=>setOpen(false)} />}
+    {open && <button type="button" aria-hidden className={styles.backdrop} onClick={()=>setOpen(false)} />}
     <nav
       id='mobile-nav'
       ref={sheetRef}
