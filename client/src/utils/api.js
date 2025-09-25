@@ -32,6 +32,7 @@ export async function getProjects(params = {}) {
   return fetchJSON(`/api/projects${qs}`);
 }
 
+
 // Auth helpers
 export async function requestPasswordReset(email) {
   return fetchJSON('/api/auth/forgot-password', {

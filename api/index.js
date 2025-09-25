@@ -51,6 +51,8 @@ const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
 const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
 const extraFrameDomains = parseList(process.env.ALLOWED_FRAME_DOMAINS);
 app.use(helmet({
+    // Allow OAuth popups/redirects to use window.opener without being blocked
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     // Allow loading cross-origin assets like images
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
@@ -96,6 +98,7 @@ app.use(helmet({
                 'https://apis.google.com',
                 // Firebase Auth helper iframe lives on project .firebaseapp.com
                 'https://*.firebaseapp.com',
+                'https://*.googleusercontent.com',
                 ...extraFrameDomains,
             ],
             // Older browsers still rely on childSrc for frames/workers
@@ -104,6 +107,7 @@ app.use(helmet({
                 'https://accounts.google.com',
                 'https://apis.google.com',
                 'https://*.firebaseapp.com',
+                'https://*.googleusercontent.com',
                 ...extraFrameDomains,
             ],
             // Forms (in case any direct POST to Cloudinary is used)

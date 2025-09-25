@@ -11,7 +11,9 @@ router.post('/register', signup);
 router.post('/login', signin);
 router.post('/google', google)
 router.post('/signout', signout)
+
 router.post('/forgot-password', forgotPassword)
 router.post('/reset-password', resetPassword)
+
 
 export default router;
