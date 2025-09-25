@@ -45,6 +45,15 @@ const userSchema = new mongoose.Schema(
             default:
                 'https://imgs.search.brave.com/n24eamZZyFy2YdTSYarsWPVTDFMgxdJj-gUWTIGoYqg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA1Lzg5LzkzLzI3/LzM2MF9GXzU4OTkz/Mjc4Ml92UUFFQVpo/SG5xMVFDR3U1aWt3/cllhUUQwTW11cm0w/Ti5qcGc',
         },
+        passwordResetToken: {
+            type: String,
+            index: true,
+            select: false,
+        },
+        passwordResetExpires: {
+            type: Date,
+            select: false,
+        },
     },
     { timestamps: true }
 );
