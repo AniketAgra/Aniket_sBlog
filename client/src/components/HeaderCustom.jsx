@@ -134,6 +134,7 @@ export default function HeaderCustom(){
             <Link to='/dashboard?tab=resume-downloads' className={`${styles.navLink} ${styles.mobileOnly}`}>Resume Downloads</Link>
           </>
         )} */}
+        
       </div>
     </nav>
     </header>
