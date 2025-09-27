@@ -1,6 +1,7 @@
 import flowbitePlugin from 'flowbite/plugin';
 
 export default {
+  darkMode: 'class',
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
