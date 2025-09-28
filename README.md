@@ -136,7 +136,7 @@ Request lifecycle
 2) Route middleware (auth/authOptional/admin) attaches `req.user` if token valid.
 3) Controller executes business logic with models and utilities (validation, slugify, etc.).
 4) Response JSON returned (and side effects like email/logging performed).
-5) Global error handler serializes errors consistently.
+5) Global error handler serializes errors consistently.  
 
 ## How the tech stack is used
 
