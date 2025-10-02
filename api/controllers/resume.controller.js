@@ -9,20 +9,33 @@ import { errorHandler } from '../utils/error.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Resolve resume path: prefer api/static/resume.pdf, fallback to client/public/resume.pdf
+// Resolve resume path in a few common locations (first hit wins)
+// 1) api/static/resume.pdf (preferred, protected assets)
+// 2) api/public/resume.pdf (legacy)
+// 3) client/public/resume.pdf (legacy/dev fallback)
 const getResumePath = () => {
-  const apiPath = path.resolve(__dirname, '../static/resume.pdf');
-  if (fs.existsSync(apiPath)) return apiPath;
-  const projectRoot = path.resolve(__dirname, '../../');
-  const clientPublic = path.resolve(projectRoot, 'client/public/resume.pdf');
-  if (fs.existsSync(clientPublic)) return clientPublic;
+  const locations = [
+    path.resolve(__dirname, '../static/resume.pdf'),
+    path.resolve(__dirname, '../public/resume.pdf'),
+    path.resolve(__dirname, '../../client/public/resume.pdf'),
+  ];
+  for (const p of locations) {
+    try {
+      if (fs.existsSync(p)) return p;
+    } catch (_) {
+      // ignore
+    }
+  }
   return null;
 };
 
 export const downloadResume = async (req, res, next) => {
   try {
     const resumePath = getResumePath();
-    if (!resumePath) return next(errorHandler(404, 'Resume not found'));
+    if (!resumePath) {
+      // Provide a helpful hint for setup
+      return next(errorHandler(404, 'Resume not found. Place your PDF at api/static/resume.pdf'));
+    }
 
     // Authentication is required by route middleware. Derive user info from DB to ensure correctness.
     const userId = req.user?.id;
@@ -56,7 +69,7 @@ export const downloadResume = async (req, res, next) => {
     // Stream file
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="resume.pdf"');
-    const stream = fs.createReadStream(resumePath);
+  const stream = fs.createReadStream(resumePath);
     stream.on('error', (err) => next(err));
     stream.pipe(res);
   } catch (e) {
