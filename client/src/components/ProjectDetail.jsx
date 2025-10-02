@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import CommentsList from './CommentsList';
 import { useSelector } from 'react-redux';
 import SignInPrompt from './SignInPrompt';
+import { normalizeMarkdownContent } from '../utils/markdown';
 
 function Tag({ label }) {
   return <span className={styles.tag}>{label}</span>;
@@ -132,13 +133,7 @@ export default function ProjectDetail() {
     }
   };
 
-  const normalizeMarkdown = (str) => {
-    if (!str) return '';
-    let s = String(str);
-    s = s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-    s = s.replace(/\r\n/g, '\n');
-    return s;
-  };
+  const normalizeMarkdown = normalizeMarkdownContent;
 
   return (
     <article className={styles.container}>

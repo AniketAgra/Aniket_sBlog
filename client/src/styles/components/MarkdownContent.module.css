@@ -34,8 +34,9 @@
   margin: 1rem 0;
 }
 
-.markdown ul { padding-left: 1rem; }
-.markdown li { margin: .25rem 0; }
+.markdown ul { padding-left: 1.25rem; list-style: disc outside; }
+.markdown ol { padding-left: 1.25rem; list-style: decimal outside; }
+.markdown li { margin: .2rem 0; }
 
 /* Make media scale to container width */
 .markdown img, .markdown video, .markdown iframe {
