@@ -89,7 +89,7 @@ export default function ManagePosts() {
 
       {/* Table */}
       <GlassCard className="p-0 overflow-hidden">
-        <div className="max-w-full overflow-x-auto">
+        <div className="max-w-full overflow-x-auto custom-scrollbar">
           <table className="min-w-[680px] w-full text-sm">
             <thead className="bg-white/[0.03]">
               <tr className="text-left">

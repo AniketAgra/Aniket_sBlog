@@ -16,25 +16,36 @@
         
 /* Custom scrollbar for data tables / horizontal sliders */
 .custom-scrollbar {
-	scrollbar-color: rgba(255,255,255,0.2) transparent; /* Firefox */
+	scrollbar-color: rgba(148,163,184,0.4) transparent; /* Firefox */
 	scrollbar-width: thin; /* Firefox */
 }
 
 /* WebKit */
 .custom-scrollbar::-webkit-scrollbar {
-	height: 10px;
-	width: 10px;
+	height: 12px; /* thicker on hoverable areas */
+	width: 12px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-	background: transparent;
+	background: radial-gradient(closest-side, rgba(255,255,255,0.06), transparent);
+	border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-	background: linear-gradient(90deg, rgba(168,85,247,0.35), rgba(99,102,241,0.35));
+	background: linear-gradient(90deg, rgba(168,85,247,0.55), rgba(99,102,241,0.55));
 	border-radius: 9999px;
-	border: 2px solid rgba(17,24,39,0.6);
+	border: 2px solid rgba(15,23,42,0.8); /* slate-900 to blend with glass */
+	box-shadow: 0 1px 2px rgba(0,0,0,0.25) inset;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-	background: linear-gradient(90deg, rgba(168,85,247,0.55), rgba(99,102,241,0.55));
+	background: linear-gradient(90deg, rgba(168,85,247,0.75), rgba(99,102,241,0.75));
+	border-color: rgba(15,23,42,0.9);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+	background: linear-gradient(90deg, rgba(168,85,247,0.95), rgba(99,102,241,0.95));
+}
+.custom-scrollbar::-webkit-scrollbar-button { /* hide arrow buttons on Windows */
+	width: 0;
+	height: 0;
+	display: none;
 }
 .custom-scrollbar::-webkit-scrollbar-corner { background: transparent; }
 

@@ -71,7 +71,7 @@ export default function HeaderCustom(){
         {/* Centered desktop nav */}
         <nav className={styles.desktopNav} aria-label='Primary'>
           <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
-          <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
+          <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>Author</Link>
           <Link to='/posts' className={`${styles.navLink} ${path==='/posts' ? styles.active : ''}`}>Blog</Link>
           <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
         </nav>
@@ -115,7 +115,7 @@ export default function HeaderCustom(){
     > 
       <div className={styles.collapseInner}>
         <Link to='/' className={`${styles.navLink} ${path==='/' ? styles.active : ''}`}>Home</Link>
-        <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>About</Link>
+        <Link to='/about' className={`${styles.navLink} ${path==='/about' ? styles.active : ''}`}>Author</Link>
         <Link to='/posts' className={`${styles.navLink} ${path==='/posts' ? styles.active : ''}`}>Blog</Link>
         <Link to='/projects' className={`${styles.navLink} ${path==='/projects' ? styles.active : ''}`}>Projects</Link>
         {currentUser && (
