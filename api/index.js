@@ -84,6 +84,7 @@ app.use(helmet({
             connectSrc: [
                 "'self'",
                 'https://api.cloudinary.com',
+                'https://api.github.com',
                 'https://apis.google.com',
                 'https://www.googleapis.com',
                 'https://securetoken.googleapis.com',
