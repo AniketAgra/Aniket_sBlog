@@ -71,6 +71,7 @@ app.use(helmet({
                 "'self'",
                 'data:',
                 'blob:',
+                'https:',  // Allow all HTTPS images (less secure, good for development)
                 'https://imgs.search.brave.com',
                 'https://via.placeholder.com',
                 'https://res.cloudinary.com',
