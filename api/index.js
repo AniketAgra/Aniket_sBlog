@@ -7,7 +7,7 @@ import userRoutes from '../api/routes/user.route.js';
 import authRoutes from '../api/routes/auth.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import helmet from 'helmet';
+// import helmet from 'helmet'; // DISABLED: Commented out since helmet is disabled
 import adminRoutes from '../api/routes/admin.js';
 import publicPostsRoutes from './routes/posts.routes.js';
 import publicProjectsRoutes from './routes/projects.route.js';
@@ -46,6 +46,9 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 // Configure Helmet with CSP tuned for our app
+// DISABLED: Helmet is causing issues with Google OAuth on deployment
+// Commenting out to allow OAuth to work properly
+/*
 const parseList = (val) => (val ? String(val).split(',').map(s => s.trim()).filter(Boolean) : []);
 const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
 const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
@@ -123,6 +126,7 @@ app.use(helmet({
         },
     },
 }));
+*/
 // CORS
 // Allow local dev frontends, optional FRONTEND_URL, and Render external URL in production
 const allowedOrigins = [
