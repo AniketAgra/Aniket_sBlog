@@ -173,10 +173,21 @@ app.use('/api', commentsRoutes);
 const publicDir = path.resolve(__dirname2, './public');
 // Allow public assets to be fetched cross-origin (useful if HTML is hosted elsewhere)
 app.use('/assets', cors({ origin: true, credentials: false }), express.static(path.join(publicDir, 'assets')));
-app.use(express.static(publicDir));
+// Serve static files with proper headers for OAuth
+app.use(express.static(publicDir, {
+    setHeaders: (res, path) => {
+        // Allow cross-origin for OAuth popups/redirects
+        if (path.endsWith('.html')) {
+            res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+            res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+        }
+    }
+}));
 app.get('*', (req, res, next) => {
     // Don't hijack API routes
     if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
     return res.sendFile(path.join(publicDir, 'index.html'));
 });
 
