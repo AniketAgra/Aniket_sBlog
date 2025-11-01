@@ -1,7 +1,7 @@
 import { Button } from "flowbite-react";
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { AiFillGoogleCircle } from "react-icons/ai";
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getAuth, getRedirectResult } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { app } from "../firebase";
 import { useDispatch } from "react-redux";
 import { signInSuccess } from "../redux/user/userSlice";
@@ -48,7 +48,7 @@ export default function OAuth() {
         }
     }, [dispatch, navigate]);
     
-    // Try popup locally; in production prefer redirect to avoid popup flakiness
+    // Always use popup for OAuth (redirect causes page reload issues)
     const handleGoogleClick = async () => {
         if (loading) return; // Prevent double-clicks
         
@@ -58,32 +58,24 @@ export default function OAuth() {
         try {
             setLoading(true);
             
-            // In production, use redirect (more reliable for OAuth)
-            if (import.meta.env.PROD) {
-                // Store a flag to know we initiated OAuth
-                sessionStorage.setItem('oauth_initiated', 'true');
-                await signInWithRedirect(auth, provider);
-                return; // The page will redirect; code after won't run
-            }
-            
-            // In development, try popup first
+            // Always use popup (more reliable and no page reload)
             const resultFromGoogle = await signInWithPopup(auth, provider);
             await sendToBackend(resultFromGoogle.user);
             
         } catch (error) {
             console.error('OAuth error:', error);
             
-            // If popup blocked/closed, fallback to redirect
-            if (error?.code === 'auth/popup-blocked' || error?.code === 'auth/popup-closed-by-user') {
-                try {
-                    sessionStorage.setItem('oauth_initiated', 'true');
-                    await signInWithRedirect(auth, provider);
-                } catch (e) {
-                    console.error('Redirect sign-in failed', e);
-                    alert('Sign-in failed. Please enable popups or try again.');
-                }
-            } else if (error?.code !== 'auth/cancelled-popup-request') {
-                // Don't show error for user cancellation
+            // Show user-friendly error messages
+            if (error?.code === 'auth/popup-blocked') {
+                alert('Popup was blocked. Please allow popups for this site and try again.');
+            } else if (error?.code === 'auth/popup-closed-by-user') {
+                // User closed popup, no error needed
+                console.log('User closed the popup');
+            } else if (error?.code === 'auth/cancelled-popup-request') {
+                // Multiple popup requests, ignore
+                console.log('Cancelled duplicate popup request');
+            } else {
+                // Other errors
                 alert('Sign-in error. Please try again.');
             }
         } finally {
@@ -91,53 +83,6 @@ export default function OAuth() {
         }
     };
     
-    // On mount, handle redirect result if returning from OAuth redirect flow
-    useEffect(() => {
-        let mounted = true;
-        
-        const handleRedirectResult = async () => {
-            // Check if we initiated OAuth (prevents unnecessary processing)
-            const initiated = sessionStorage.getItem('oauth_initiated');
-            if (!initiated) return;
-            
-            try {
-                setLoading(true);
-                const result = await getRedirectResult(auth);
-                
-                if (result && result.user && mounted) {
-                    // Clear the flag
-                    sessionStorage.removeItem('oauth_initiated');
-                    
-                    // Send to backend
-                    const success = await sendToBackend(result.user);
-                    
-                    if (!success && mounted) {
-                        setLoading(false);
-                    }
-                } else {
-                    // No result, clear flag and stop loading
-                    sessionStorage.removeItem('oauth_initiated');
-                    if (mounted) setLoading(false);
-                }
-            } catch (err) {
-                console.error('Handle redirect result error', err);
-                sessionStorage.removeItem('oauth_initiated');
-                
-                // Only show error if it's not a "no auth event" error
-                if (err?.code && !String(err.code).includes('no-auth-event') && mounted) {
-                    alert('Authentication error. Please try signing in again.');
-                }
-                
-                if (mounted) setLoading(false);
-            }
-        };
-        
-        handleRedirectResult();
-        
-        return () => {
-            mounted = false;
-        };
-    }, [auth, sendToBackend]);
     return (
         <Button 
             type="button" 
