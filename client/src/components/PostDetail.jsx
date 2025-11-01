@@ -77,6 +77,7 @@ export default function PostDetail() {
           };
         });
   if (typeof data.likes === 'number') setLikes(Number(data.likes));
+  if (typeof data.liked === 'boolean') setLiked(data.liked);
       } catch (_) { /* ignore */ }
     };
     const h = setInterval(tick, 10000);

@@ -305,13 +305,17 @@ export const likePost = async (req, res, next) => {
     const alreadyByUser = userId && post.likedByUserIds.some(u => u.toString() === userId);
     const alreadyByIp = post.likedByIps.includes(String(ip));
     if (alreadyByUser || alreadyByIp) {
-      // Toggle off (unlike)
+      // Toggle off (unlike) - Remove both user ID and IP to maintain consistency
+      const pullUpdate = {
+        likedByIps: String(ip),
+      };
+      if (userId) {
+        pullUpdate.likedByUserIds = userId;
+      }
+      
       const update = {
         $inc: { likes: -1 },
-        $pull: {
-          ...(userId ? { likedByUserIds: userId } : {}),
-          likedByIps: String(ip),
-        },
+        $pull: pullUpdate,
       };
       const updated = await Post.findByIdAndUpdate(id, update, { new: true });
       const likes = Math.max(0, updated.likes || 0);
@@ -321,9 +325,18 @@ export const likePost = async (req, res, next) => {
       return res.json({ likes, liked: false });
     }
 
-    // Like
-    const update = { $inc: { likes: 1 }, $addToSet: { likedByIps: String(ip) } };
-    if (userId) update.$addToSet.likedByUserIds = userId;
+    // Like - Add both user ID (if logged in) and IP
+    const addToSetUpdate = {
+      likedByIps: String(ip),
+    };
+    if (userId) {
+      addToSetUpdate.likedByUserIds = userId;
+    }
+    
+    const update = { 
+      $inc: { likes: 1 }, 
+      $addToSet: addToSetUpdate,
+    };
     const updated = await Post.findByIdAndUpdate(id, update, { new: true });
     res.json({ likes: updated.likes, liked: true });
   } catch (e) { next(e); }
@@ -455,13 +468,17 @@ export const likeProject = async (req, res, next) => {
     const alreadyByUser = userId && project.likedByUserIds.some(u => u.toString() === userId);
     const alreadyByIp = project.likedByIps.includes(String(ip));
     if (alreadyByUser || alreadyByIp) {
-      // Unlike
+      // Unlike - Remove both user ID and IP to maintain consistency
+      const pullUpdate = {
+        likedByIps: String(ip),
+      };
+      if (userId) {
+        pullUpdate.likedByUserIds = userId;
+      }
+      
       const update = {
         $inc: { likes: -1 },
-        $pull: {
-          ...(userId ? { likedByUserIds: userId } : {}),
-          likedByIps: String(ip),
-        },
+        $pull: pullUpdate,
       };
       const updated = await Project.findByIdAndUpdate(id, update, { new: true });
       const likes = Math.max(0, updated.likes || 0);
@@ -471,8 +488,18 @@ export const likeProject = async (req, res, next) => {
       return res.json({ likes, liked: false });
     }
 
-    const update = { $inc: { likes: 1 }, $addToSet: { likedByIps: String(ip) } };
-    if (userId) update.$addToSet.likedByUserIds = userId;
+    // Like - Add both user ID (if logged in) and IP
+    const addToSetUpdate = {
+      likedByIps: String(ip),
+    };
+    if (userId) {
+      addToSetUpdate.likedByUserIds = userId;
+    }
+    
+    const update = { 
+      $inc: { likes: 1 }, 
+      $addToSet: addToSetUpdate,
+    };
     const updated = await Project.findByIdAndUpdate(id, update, { new: true });
     res.json({ likes: updated.likes, liked: true });
   } catch (e) { next(e); }
