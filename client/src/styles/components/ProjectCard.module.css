@@ -26,12 +26,45 @@
 .card:hover .mediaGradient { opacity:.42; }
 
 .content { padding: .75rem .9rem; }
-.meta { min-height: 4.9rem; /* slightly tighter */ }
-.date { font-size: .65rem; color: #9CA3AF; }
-.title { margin-top: .35rem; font-size: 1.02rem; font-weight: 800; line-height: 1.25; letter-spacing: .01em; }
-.tagline { margin-top: .35rem; font-size: .9rem; color: rgba(229,231,235,0.9); display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient: vertical; overflow:hidden; min-height: 3.2em; }
+.meta { min-height: 5.5rem; /* fixed height for consistency */ }
+.date { font-size: .65rem; color: #9CA3AF; line-height: 1.2; }
+.title { 
+  margin-top: .35rem; 
+  font-size: 1.02rem; 
+  font-weight: 800; 
+  line-height: 1.3; 
+  letter-spacing: .01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6rem;
+}
+.tagline { 
+  margin-top: .35rem; 
+  font-size: .88rem; 
+  color: rgba(229,231,235,0.85); 
+  line-height: 1.4;
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  min-height: 2.5rem;
+  max-height: 2.5rem;
+}
 
-.tagsRow { margin-top: .6rem; display:flex; flex-wrap: wrap; gap: .45rem; min-height: 1.8rem; }
+.tagsRow { 
+  margin-top: .6rem; 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: .45rem; 
+  min-height: 2rem;
+  max-height: 4rem;
+  overflow: hidden;
+}
 .tag { font-size: .68rem; padding: .22rem .55rem; border-radius: 9999px; color: #F3F4F6; display:inline-flex; align-items:center; gap:.35rem; position:relative; }
 .tagGradient {
   background:

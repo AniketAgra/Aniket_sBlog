@@ -10,6 +10,13 @@ export default function Home() {
     const [email, setEmail] = useState('');
     const [subStatus, setSubStatus] = useState({ loading: false, message: null, error: null });
 
+    // Helper to truncate text with ellipsis
+    const truncate = (text, limit = 80) => {
+        if (!text) return '';
+        const s = String(text).trim();
+        return s.length > limit ? s.slice(0, limit).trimEnd() + '...' : s;
+    };
+
     const handleSubscribe = async (e) => {
         e.preventDefault();
         const emailOk = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email.trim());
@@ -323,7 +330,7 @@ export default function Home() {
                                     <div className={styles.projectListBody}>
                                         {/* <div className={styles.tileMeta}>{new Date(p.createdAt).toLocaleDateString()}</div> */}
                                         <h4 className={styles.tileTitle}>{p.title}</h4>
-                                        {p.tagline && <p className={styles.tileDesc}>{p.tagline}</p>}
+                                        {p.tagline && <p className={styles.tileDesc}>{truncate(p.tagline, 70)}</p>}
                                         {/* <div className={styles.tileMeta}>
                                             {(typeof p.likes === 'number' ? `${p.likes} likes` : '')}
                                             {p.views ? ` · ${p.views} views` : ''}
