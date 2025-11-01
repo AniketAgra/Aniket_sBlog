@@ -268,14 +268,10 @@ export const getPost = async (req, res, next) => {
     }
     if (!post) return next(errorHandler(404, 'Post not found'));
     const commentsDocs = await Comment.find({ targetType: 'post', targetId: post._id, parentId: null }).sort({ createdAt: -1 });
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
     const comments = commentsDocs.map((c) => ({
       ...c.toObject(),
-      liked: !!(
-        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
-        (ip && c.likedByIps?.includes(String(ip)))
-      ),
+      liked: !!(userId && c.likedByUserIds?.some((u) => String(u) === userId)),
     }));
     const obj = post.toObject({ virtuals: true });
     const author = post.author && typeof post.author === 'object' ? {
@@ -284,38 +280,31 @@ export const getPost = async (req, res, next) => {
       username: post.author.username,
       profilePicture: post.author.profilePicture,
     } : undefined;
-    const liked = !!(
-      (userId && post.likedByUserIds?.some((u) => String(u) === userId)) ||
-      (ip && post.likedByIps?.includes(String(ip)))
-    );
+    const liked = !!(userId && post.likedByUserIds?.some((u) => String(u) === userId));
     res.json({ ...obj, author, authorName: author?.name, comments, liked });
   } catch (e) { next(e); }
 };
 
-// Public: Like Post (one per user or IP)
+// Public: Like Post (requires authentication - one per user based on userId only)
 export const likePost = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const userId = req.user?.id;
+
+    // Ensure user is authenticated (middleware should handle this, but double-check)
+    if (!userId) return next(errorHandler(401, 'Authentication required to like posts'));
 
     const post = await Post.findById(id);
     if (!post) return next(errorHandler(404, 'Post not found'));
 
-    const alreadyByUser = userId && post.likedByUserIds.some(u => u.toString() === userId);
-    const alreadyByIp = post.likedByIps.includes(String(ip));
-    if (alreadyByUser || alreadyByIp) {
-      // Toggle off (unlike) - Remove both user ID and IP to maintain consistency
-      const pullUpdate = {
-        likedByIps: String(ip),
-      };
-      if (userId) {
-        pullUpdate.likedByUserIds = userId;
-      }
-      
+    // Check if user has already liked this post (only check userId, not IP)
+    const alreadyLiked = post.likedByUserIds.some(u => u.toString() === userId);
+    
+    if (alreadyLiked) {
+      // Toggle off (unlike) - Remove user ID only
       const update = {
         $inc: { likes: -1 },
-        $pull: pullUpdate,
+        $pull: { likedByUserIds: userId },
       };
       const updated = await Post.findByIdAndUpdate(id, update, { new: true });
       const likes = Math.max(0, updated.likes || 0);
@@ -325,17 +314,10 @@ export const likePost = async (req, res, next) => {
       return res.json({ likes, liked: false });
     }
 
-    // Like - Add both user ID (if logged in) and IP
-    const addToSetUpdate = {
-      likedByIps: String(ip),
-    };
-    if (userId) {
-      addToSetUpdate.likedByUserIds = userId;
-    }
-    
+    // Like - Add user ID only (no IP tracking for authenticated users)
     const update = { 
       $inc: { likes: 1 }, 
-      $addToSet: addToSetUpdate,
+      $addToSet: { likedByUserIds: userId },
     };
     const updated = await Post.findByIdAndUpdate(id, update, { new: true });
     res.json({ likes: updated.likes, liked: true });
@@ -370,7 +352,6 @@ export const getPostComments = async (req, res, next) => {
     const { page = 1, limit = 20 } = req.query;
     const post = await Post.findById(id);
     if (!post) return next(errorHandler(404, 'Post not found'));
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
     const docs = await Comment.find({ targetType: 'post', targetId: post._id, parentId: null })
       .sort({ createdAt: -1 })
@@ -379,10 +360,7 @@ export const getPostComments = async (req, res, next) => {
     const total = await Comment.countDocuments({ targetType: 'post', targetId: post._id, parentId: null });
     const items = docs.map((c) => ({
       ...c.toObject(),
-      liked: !!(
-        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
-        (ip && c.likedByIps?.includes(String(ip)))
-      ),
+      liked: !!(userId && c.likedByUserIds?.some((u) => String(u) === userId)),
     }));
     res.json({ items, page: +page, total });
   } catch (e) { next(e); }
@@ -405,19 +383,12 @@ export const getProject = async (req, res, next) => {
     if (!project) return next(errorHandler(404, 'Project not found'));
 
     const commentsDocs = await Comment.find({ targetType: 'project', targetId: project._id, parentId: null }).sort({ createdAt: -1 });
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
     const comments = commentsDocs.map((c) => ({
       ...c.toObject(),
-      liked: !!(
-        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
-        (ip && c.likedByIps?.includes(String(ip)))
-      ),
+      liked: !!(userId && c.likedByUserIds?.some((u) => String(u) === userId)),
     }));
-    const liked = !!(
-      (userId && project.likedByUserIds?.some((u) => String(u) === userId)) ||
-      (ip && project.likedByIps?.includes(String(ip)))
-    );
+    const liked = !!(userId && project.likedByUserIds?.some((u) => String(u) === userId));
     res.json({ ...project.toObject(), comments, liked });
   } catch (e) { next(e); }
 };
@@ -428,14 +399,10 @@ export const getPostCounters = async (req, res, next) => {
     const { id } = req.params;
     const isObjectId = !!(id && Types.ObjectId.isValid(id));
     const query = isObjectId ? { _id: id } : { slug: id };
-    const post = await Post.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1, likedByIps: 1 });
+    const post = await Post.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1 });
     if (!post) return next(errorHandler(404, 'Post not found'));
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
-    const liked = !!(
-      (userId && post.likedByUserIds?.some((u) => String(u) === userId)) ||
-      (ip && post.likedByIps?.includes(String(ip)))
-    );
+    const liked = !!(userId && post.likedByUserIds?.some((u) => String(u) === userId));
     res.json({ likes: post.likes || 0, commentsCount: post.commentsCount || 0, updatedAt: post.updatedAt, liked });
   } catch (e) { next(e); }
 };
@@ -446,14 +413,10 @@ export const getProjectCounters = async (req, res, next) => {
     const { id } = req.params;
     const isObjectId = !!(id && Types.ObjectId.isValid(id));
     const query = isObjectId ? { _id: id } : { slug: id };
-    const project = await Project.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1, likedByIps: 1 });
+    const project = await Project.findOne(query).select({ likes: 1, commentsCount: 1, updatedAt: 1, likedByUserIds: 1 });
     if (!project) return next(errorHandler(404, 'Project not found'));
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
-    const liked = !!(
-      (userId && project.likedByUserIds?.some((u) => String(u) === userId)) ||
-      (ip && project.likedByIps?.includes(String(ip)))
-    );
+    const liked = !!(userId && project.likedByUserIds?.some((u) => String(u) === userId));
     res.json({ likes: project.likes || 0, commentsCount: project.commentsCount || 0, updatedAt: project.updatedAt, liked });
   } catch (e) { next(e); }
 };
@@ -461,24 +424,22 @@ export const getProjectCounters = async (req, res, next) => {
 export const likeProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const userId = req.user?.id;
+
+    // Ensure user is authenticated (middleware should handle this, but double-check)
+    if (!userId) return next(errorHandler(401, 'Authentication required to like projects'));
+
     const project = await Project.findById(id);
     if (!project) return next(errorHandler(404, 'Project not found'));
-    const alreadyByUser = userId && project.likedByUserIds.some(u => u.toString() === userId);
-    const alreadyByIp = project.likedByIps.includes(String(ip));
-    if (alreadyByUser || alreadyByIp) {
-      // Unlike - Remove both user ID and IP to maintain consistency
-      const pullUpdate = {
-        likedByIps: String(ip),
-      };
-      if (userId) {
-        pullUpdate.likedByUserIds = userId;
-      }
-      
+    
+    // Check if user has already liked this project (only check userId, not IP)
+    const alreadyLiked = project.likedByUserIds.some(u => u.toString() === userId);
+    
+    if (alreadyLiked) {
+      // Unlike - Remove user ID only
       const update = {
         $inc: { likes: -1 },
-        $pull: pullUpdate,
+        $pull: { likedByUserIds: userId },
       };
       const updated = await Project.findByIdAndUpdate(id, update, { new: true });
       const likes = Math.max(0, updated.likes || 0);
@@ -488,17 +449,10 @@ export const likeProject = async (req, res, next) => {
       return res.json({ likes, liked: false });
     }
 
-    // Like - Add both user ID (if logged in) and IP
-    const addToSetUpdate = {
-      likedByIps: String(ip),
-    };
-    if (userId) {
-      addToSetUpdate.likedByUserIds = userId;
-    }
-    
+    // Like - Add user ID only (no IP tracking for authenticated users)
     const update = { 
       $inc: { likes: 1 }, 
-      $addToSet: addToSetUpdate,
+      $addToSet: { likedByUserIds: userId },
     };
     const updated = await Project.findByIdAndUpdate(id, update, { new: true });
     res.json({ likes: updated.likes, liked: true });
@@ -532,7 +486,6 @@ export const getProjectComments = async (req, res, next) => {
     const { page = 1, limit = 20 } = req.query;
     const project = await Project.findById(id);
     if (!project) return next(errorHandler(404, 'Project not found'));
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress;
     const userId = req.user?.id ? String(req.user.id) : null;
     const docs = await Comment.find({ targetType: 'project', targetId: project._id, parentId: null })
       .sort({ createdAt: -1 })
@@ -541,10 +494,7 @@ export const getProjectComments = async (req, res, next) => {
     const total = await Comment.countDocuments({ targetType: 'project', targetId: project._id, parentId: null });
     const items = docs.map((c) => ({
       ...c.toObject(),
-      liked: !!(
-        (userId && c.likedByUserIds?.some((u) => String(u) === userId)) ||
-        (ip && c.likedByIps?.includes(String(ip)))
-      ),
+      liked: !!(userId && c.likedByUserIds?.some((u) => String(u) === userId)),
     }));
     res.json({ items, page: +page, total });
   } catch (e) { next(e); }
