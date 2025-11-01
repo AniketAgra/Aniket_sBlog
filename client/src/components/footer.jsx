@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BsFacebook, BsInstagram, BsTwitter, BsGithub, BsDribbble } from 'react-icons/bs';
+import { BsFacebook, BsInstagram, BsTwitter, BsGithub, BsLinkedin } from 'react-icons/bs';
 import styles from '../styles/components/Footer.module.css';
 
 export default function FooterComponent() {
@@ -19,7 +19,7 @@ export default function FooterComponent() {
                         <div>
                             <h3 className={styles.colTitle}>ABOUT</h3>
                             <ul className={styles.linkCol}>
-                                <li><a href="https://www.100jsprojects.com" target="_blank" rel="noopener noreferrer" className={styles.link}>Projects</a></li>
+                                <li><a href="https://aniketsblog-lgrb.onrender.com/projects" target="_blank" rel="noopener noreferrer" className={styles.link}>Projects</a></li>
                                 <li><Link to='/about' className={styles.link}>Aniket&apos;s Blog</Link></li>
                             </ul>
                         </div>
@@ -47,11 +47,12 @@ export default function FooterComponent() {
                         &copy; {year} <span className={styles.copyBrand}>Aniket&apos;s blog</span>
                     </p>
                     <div className={styles.socialRow}>
-                        <a href="#" aria-label='Facebook' className={styles.iconLink}><BsFacebook/></a>
-                        <a href="#" aria-label='Instagram' className={styles.iconLink}><BsInstagram/></a>
-                        <a href="#" aria-label='Twitter' className={styles.iconLink}><BsTwitter/></a>
-                        <a href="#" aria-label='GitHub' className={styles.iconLink}><BsGithub/></a>
-                        <a href="#" aria-label='Dribbble' className={styles.iconLink}><BsDribbble/></a>
+                        <a href="https://www.facebook.com/share/1APYVdaw3F/" aria-label='Facebook' className={styles.iconLink}><BsFacebook/></a>
+                        <a href="https://www.instagram.com/aniket_agrawal_07" aria-label='Instagram' className={styles.iconLink}><BsInstagram/></a>
+                        <a href="https://twitter.com/AniketA69231321" aria-label='Twitter' className={styles.iconLink}><BsTwitter/></a>
+                        <a href="https://github.com/aniketagra" aria-label='GitHub' className={styles.iconLink}><BsGithub/></a>
+                        {/* <a href="#" aria-label='Dribbble' className={styles.iconLink}><BsDribbble/></a> */}
+                        <a href="https://www.linkedin.com/in/aniket-agrawal-95678a288" aria-label='LinkedIn' className={styles.iconLink}><BsLinkedin/></a>
                     </div>
                 </div>
             </div>

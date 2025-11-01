@@ -71,8 +71,8 @@ export default function ProjectCard({ project, variant = 'grid', onRequireAuth }
   // Helper to truncate long descriptions with an ellipsis
   const truncate = (text, limit = 100) => {
     if (!text) return '';
-    const s = String(text);
-    return s.length > limit ? s.slice(0, Math.max(0, limit - 1)).trimEnd() + '…' : s;
+    const s = String(text).trim();
+    return s.length > limit ? s.slice(0, Math.max(0, limit)).trimEnd() + '...' : s;
   };
 
   const uniqueTags = useMemo(() => {
@@ -183,7 +183,7 @@ export default function ProjectCard({ project, variant = 'grid', onRequireAuth }
             <div className={styles.date}>{project.createdAt ? new Date(project.createdAt).toLocaleDateString() : ''}</div>
             <h3 className={styles.title}>{project.title}</h3>
             {/* Always render tagline block to keep height consistent, even if empty */}
-            <p className={styles.tagline}>{project.tagline ? truncate(project.tagline, 90) : ''}</p>
+            <p className={styles.tagline}>{project.tagline ? truncate(project.tagline, 80) : ''}</p>
           </div>
           <div className={styles.tagsRow}>
             {uniqueTags.slice(0, 5).map((tag) => (

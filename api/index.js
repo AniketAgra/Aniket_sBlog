@@ -7,7 +7,7 @@ import userRoutes from '../api/routes/user.route.js';
 import authRoutes from '../api/routes/auth.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import helmet from 'helmet';
+// import helmet from 'helmet'; // DISABLED: Commented out since helmet is disabled
 import adminRoutes from '../api/routes/admin.js';
 import publicPostsRoutes from './routes/posts.routes.js';
 import publicProjectsRoutes from './routes/projects.route.js';
@@ -46,6 +46,9 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 // Configure Helmet with CSP tuned for our app
+// DISABLED: Helmet is causing issues with Google OAuth on deployment
+// Commenting out to allow OAuth to work properly
+/*
 const parseList = (val) => (val ? String(val).split(',').map(s => s.trim()).filter(Boolean) : []);
 const extraImgDomains = parseList(process.env.ALLOWED_IMG_DOMAINS);
 const extraConnectDomains = parseList(process.env.ALLOWED_CONNECT_DOMAINS);
@@ -71,6 +74,7 @@ app.use(helmet({
                 "'self'",
                 'data:',
                 'blob:',
+                'https:',  // Allow all HTTPS images (less secure, good for development)
                 'https://imgs.search.brave.com',
                 'https://via.placeholder.com',
                 'https://res.cloudinary.com',
@@ -83,6 +87,7 @@ app.use(helmet({
             connectSrc: [
                 "'self'",
                 'https://api.cloudinary.com',
+                'https://api.github.com',
                 'https://apis.google.com',
                 'https://www.googleapis.com',
                 'https://securetoken.googleapis.com',
@@ -121,6 +126,7 @@ app.use(helmet({
         },
     },
 }));
+*/
 // CORS
 // Allow local dev frontends, optional FRONTEND_URL, and Render external URL in production
 const allowedOrigins = [
@@ -171,10 +177,21 @@ app.use('/api', commentsRoutes);
 const publicDir = path.resolve(__dirname2, './public');
 // Allow public assets to be fetched cross-origin (useful if HTML is hosted elsewhere)
 app.use('/assets', cors({ origin: true, credentials: false }), express.static(path.join(publicDir, 'assets')));
-app.use(express.static(publicDir));
+// Serve static files with proper headers for OAuth
+app.use(express.static(publicDir, {
+    setHeaders: (res, path) => {
+        // Allow cross-origin for OAuth popups/redirects
+        if (path.endsWith('.html')) {
+            res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+            res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+        }
+    }
+}));
 app.get('*', (req, res, next) => {
     // Don't hijack API routes
     if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
     return res.sendFile(path.join(publicDir, 'index.html'));
 });
 

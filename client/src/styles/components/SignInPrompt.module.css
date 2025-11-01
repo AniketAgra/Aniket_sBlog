@@ -120,15 +120,4 @@
   height: 18px;
 }
 
-/* Light theme fallback where page background is light */
-@media (prefers-color-scheme: light) {
-  .card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75));
-    border: 1px solid rgba(0,0,0,0.08);
-    color: #111827;
-  }
-  .title { color: #111827; }
-  .desc { color: #4b5563; }
-  .closeBtn { color: #111827; background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
-  .secondaryBtn { color: #111827; background: rgba(17,24,39,0.04); border-color: rgba(0,0,0,0.12); }
-}
+/* Light theme removed; dark-only styles above */

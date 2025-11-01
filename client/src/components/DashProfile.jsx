@@ -333,7 +333,7 @@ export default function DashProfile() {
 
           <Button
             type="submit"
-            className="w-full rounded-xl bg-black text-white border-purple-400 font-semibold shadow-lg hover:bg-white hover:text-black hover:font-semibold hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            className="w-full rounded-xl bg-black text-white border-purple-400 font-semibold shadow-lg hover:bg-white/10 hover:text-white hover:font-semibold hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
           >
             Update
           </Button>

@@ -12,6 +12,7 @@ import RelatedArticles from './RelatedArticles';
 import CommentsList from './CommentsList';
 import { useSelector } from 'react-redux';
 import SignInPrompt from './SignInPrompt';
+import { normalizeMarkdownContent } from '../utils/markdown';
 
 function TagBadge({ label }) {
   return (
@@ -76,6 +77,7 @@ export default function PostDetail() {
           };
         });
   if (typeof data.likes === 'number') setLikes(Number(data.likes));
+  if (typeof data.liked === 'boolean') setLiked(data.liked);
       } catch (_) { /* ignore */ }
     };
     const h = setInterval(tick, 10000);
@@ -155,15 +157,7 @@ export default function PostDetail() {
     }
   };
 
-  const normalizeMarkdown = (str) => {
-    if (!str) return '';
-    let s = String(str);
-    // Convert literal \n and \t into real newlines/tabs
-    s = s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-    // Normalize CRLF
-    s = s.replace(/\r\n/g, '\n');
-    return s;
-  };
+  const normalizeMarkdown = normalizeMarkdownContent;
 
   if (!currentUser) {
     return (
